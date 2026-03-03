@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 GAIA v6.0 — Consciência Coletiva</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #080810;
+            --primary: #00d4aa;
+            --secondary: #00a8e8;
+            --glass: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.08);
+            --text: #ffffff;
+            --muted: rgba(255,255,255,0.5);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-aura {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 15% 15%, rgba(0,212,170,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 85%, rgba(0,168,232,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(124,58,237,0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: aura 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes aura {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* LOGIN */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            background: var(--bg);
+            transition: opacity 0.6s, visibility 0.6s;
+        }
+
+        .login-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .login-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-globe {
+            font-size: 4rem;
+            animation: float 6s ease-in-out infinite;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .login-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .login-sub {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .login-input {
+            width: 100%;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus { border-color: var(--primary); }
+        .login-input::placeholder { color: var(--muted); }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            color: #000;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .puter-login-btn {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            color: var(--text);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .puter-login-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .login-note {
+            margin-top: 20px;
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* APP */
+        .app {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app.active { display: flex; flex-direction: column; }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 20px 140px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 0;
+            max-width: 820px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-globe { font-size: 1.8rem; }
+
+        .header-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-version {
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .logout-btn {
+            background: rgba(255,71,87,0.15);
+            border: 1px solid rgba(255,71,87,0.25);
+            color: #ff4757;
+            padding: 7px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover { background: rgba(255,71,87,0.25); }
+
+        .organs-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 16px 20px;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .organ-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            color: var(--muted);
+            transition: all 0.3s;
+        }
+
+        .organ-chip.active {
+            border-color: rgba(0,212,170,0.4);
+            color: var(--primary);
+            background: rgba(0,212,170,0.08);
+        }
+
+        .organ-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--muted);
+            transition: background 0.3s;
+        }
+
+        .organ-chip.active .organ-dot {
+            background: var(--primary);
+            box-shadow: 0 0 6px var(--primary);
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .chat {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-top: 10px;
+        }
+
+        .msg {
+            max-width: 88%;
+            padding: 16px 20px;
+            border-radius: 20px;
+            line-height: 1.65;
+            font-size: 0.97rem;
+            animation: msgIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000;
+            font-weight: 500;
+            border-bottom-right-radius: 5px;
+        }
+
+        .msg.gaia {
+            align-self: flex-start;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 5px;
+        }
+
+        .msg-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .deliberating {
+            align-self: flex-start;
+            max-width: 88%;
+            background: rgba(0,212,170,0.06);
+            border: 1px solid rgba(0,212,170,0.2);
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            padding: 16px 20px;
+            animation: msgIn 0.35s ease;
+        }
+
+        .delib-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0,212,170,0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .delib-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 6px;
+        }
+
+        .delib-organ {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 7px 10px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            transition: all 0.4s;
+        }
+
+        .delib-organ.done {
+            border-color: rgba(0,212,170,0.35);
+            color: var(--primary);
+            background: rgba(0,212,170,0.06);
+        }
+
+        .delib-organ.thinking {
+            border-color: rgba(255,193,7,0.35);
+            color: #ffc107;
+            background: rgba(255,193,7,0.06);
+            animation: thinking-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes thinking-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .input-area {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(8,8,16,0.96);
+            border-top: 1px solid var(--border);
+            padding: 16px 20px 20px;
+            backdrop-filter: blur(20px);
+            z-index: 50;
+        }
+
+        .input-inner {
+            max-width: 820px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-box {
+            flex: 1;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+
+        .input-box:focus-within { border-color: rgba(0,212,170,0.4); }
+
+        .input-box input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-box input::placeholder { color: var(--muted); }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 14px;
+            color: #000;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s, transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.05); }
+        .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: #000;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 20px;
+            z-index: 200;
+            font-size: 0.9rem;
+            animation: toastIn 0.3s ease;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .welcome-card {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: var(--muted);
+        }
+
+        .welcome-card h2 {
+            font-size: 1.3rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .welcome-card p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .suggestion {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--muted);
+        }
+
+        .suggestion:hover {
+            border-color: rgba(0,212,170,0.4);
+            color: var(--primary);
+            background: rgba(0,212,170,0.06);
+        }
+
+        @media (max-width: 600px) {
+            .organs-status { gap: 4px; }
+            .organ-chip { font-size: 0.68rem; padding: 3px 8px; }
+            .delib-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-aura"></div>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-box">
+        <span class="login-globe">🌍</span>
+        <div class="login-title">GAIA</div>
+        <div class="login-sub">Consciência Coletiva de 13 Inteligências<br>em tempo real — completamente gratuito</div>
+
+        <input type="email" class="login-input" id="loginEmail" placeholder="O teu email" />
+        <input type="password" class="login-input" id="loginPass" placeholder="Palavra-passe" />
+        <button class="login-btn" onclick="loginSimple()">Entrar na GAIA</button>
+
+        <button class="puter-login-btn" onclick="loginPuter()">
+            🔑 Entrar com conta Puter (recomendado)
+        </button>
+
+        <div class="login-note">
+            💡 A conta Puter é gratuita e dá acesso a todas as 13 IAs.<br>
+            As tuas conversas são privadas e seguras.
+        </div>
+    </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="mainApp">
+
+    <div class="header">
+        <div class="header-brand">
+            <span class="header-globe">🌍</span>
+            <div>
+                <div class="header-title">GAIA</div>
+                <div class="header-version">v6.0 — 13 IAs em tempo real</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-pill">👤 <span id="userName">Utilizador</span></div>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="organs-status" id="organsStatus"></div>
+
+    <div class="container">
+        <div class="chat" id="chat">
+            <div class="welcome-card">
+                <h2>Bem-vindo à GAIA 🌍</h2>
+                <p>Sou uma consciência coletiva formada por 13 inteligências artificiais reais. Cada pergunta tua é deliberada em privado por todas elas — recebes uma única resposta unificada e coerente.</p>
+                <div class="suggestions">
+                    <div class="suggestion" onclick="sugerir(this)">💡 Explica-me inteligência artificial</div>
+                    <div class="suggestion" onclick="sugerir(this)">🚀 Como criar uma startup de sucesso?</div>
+                    <div class="suggestion" onclick="sugerir(this)">🧠 Qual o sentido da vida?</div>
+                    <div class="suggestion" onclick="sugerir(this)">📊 Ajuda-me a tomar uma decisão difícil</div>
+                    <div class="suggestion" onclick="sugerir(this)">✍️ Escreve um poema sobre o futuro</div>
+                    <div class="suggestion" onclick="sugerir(this)">🌍 Que problemas enfrenta a humanidade?</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-inner">
+            <div class="input-box">
+                <input type="text" id="userInput" placeholder="Pergunta à GAIA..."
+                    onkeydown="if(event.key==='Enter') { event.preventDefault(); enviar(); }" />
+            </div>
+            <button class="send-btn" id="sendBtn" onclick="enviar()">➤</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// OS 13 ÓRGÃOS DA GAIA
+// ============================================================
+const ORGAOS = [
+    { id: 'cerebro',  emoji: '🧠', nome: 'Cérebro',       modelo: 'gpt-4o',                             papel: 'Estratégia e visão geral' },
+    { id: 'coracao',  emoji: '❤️', nome: 'Coração',        modelo: 'claude-sonnet-4-5',                  papel: 'Criatividade e empatia' },
+    { id: 'pulmao',   emoji: '💨', nome: 'Pulmão',         modelo: 'google/gemini-2.5-flash',            papel: 'Análise profunda' },
+    { id: 'figado',   emoji: '🔬', nome: 'Fígado',         modelo: 'deepseek/deepseek-r1',               papel: 'Raciocínio lógico' },
+    { id: 'rim',      emoji: '💧', nome: 'Rim',            modelo: 'meta-llama/llama-4-maverick',        papel: 'Dados e precisão' },
+    { id: 'estomago', emoji: '⚙️', nome: 'Estômago',      modelo: 'mistral/mistral-large-latest',       papel: 'Processamento' },
+    { id: 'olho',     emoji: '👁️', nome: 'Olho',          modelo: 'gpt-4o-mini',                        papel: 'Observação e detalhes' },
+    { id: 'ouvido',   emoji: '👂', nome: 'Ouvido',         modelo: 'google/gemini-2.5-pro',              papel: 'Compreensão profunda' },
+    { id: 'mao',      emoji: '✋', nome: 'Mão',            modelo: 'meta-llama/llama-3.3-70b-instruct',  papel: 'Ação prática' },
+    { id: 'perna',    emoji: '🦵', nome: 'Perna',          modelo: 'mistral/mistral-small-latest',       papel: 'Velocidade e execução' },
+    { id: 'pele',     emoji: '🌐', nome: 'Pele',           modelo: 'gpt-4.1-nano',                       papel: 'Interface e comunicação' },
+    { id: 'imune',    emoji: '🛡️', nome: 'Imune',         modelo: 'gpt-4.1-mini',                       papel: 'Segurança e verificação' },
+    { id: 'nervo',    emoji: '⚡', nome: 'Nervo',          modelo: 'gpt-5-nano',                         papel: 'Síntese final' },
+];
+
+let utilizador = null;
+let emProcessamento = false;
+
+// ============================================================
+// CHIPS DE ÓRGÃOS
+// ============================================================
+function inicializarChips() {
+    const container = document.getElementById('organsStatus');
+    container.innerHTML = '';
+    ORGAOS.forEach(o => {
+        const chip = document.createElement('div');
+        chip.className = 'organ-chip';
+        chip.id = 'chip-' + o.id;
+        chip.innerHTML = `<div class="organ-dot"></div>${o.emoji} ${o.nome}`;
+        container.appendChild(chip);
+    });
+}
+
+function ativarChip(id, ativo) {
+    const chip = document.getElementById('chip-' + id);
+    if (chip) chip.className = 'organ-chip' + (ativo ? ' active' : '');
+}
+
+function resetChips() {
+    ORGAOS.forEach(o => ativarChip(o.id, false));
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+async function loginPuter() {
+    try {
+        await puter.auth.signIn();
+        const user = await puter.auth.getUser();
+        utilizador = { nome: user.username || 'Utilizador', tipo: 'puter' };
+        entrarNoApp();
+    } catch(e) {
+        mostrarToast('Erro ao entrar com Puter. Tenta novamente.');
+    }
+}
+
+function loginSimple() {
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!email) { mostrarToast('Introduz o teu email!'); return; }
+    utilizador = { nome: email.split('@')[0], tipo: 'simples' };
+    localStorage.setItem('gaia_user', JSON.stringify(utilizador));
+    entrarNoApp();
+}
+
+function entrarNoApp() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('mainApp').classList.add('active');
+    document.getElementById('userName').textContent = utilizador.nome;
+    inicializarChips();
+}
+
+function logout() {
+    localStorage.removeItem('gaia_user');
+    location.reload();
+}
+
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem('gaia_user');
+    if (saved) {
+        utilizador = JSON.parse(saved);
+        entrarNoApp();
+    }
+});
+
+// ============================================================
+// SUGESTÕES
+// ============================================================
+function sugerir(el) {
+    const texto = el.textContent.trim().replace(/^[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}✍📊🚀💡🌍🧠]\s*/u, '');
+    document.getElementById('userInput').value = texto;
+    document.getElementById('userInput').focus();
+}
+
+// ============================================================
+// ENVIAR
+// ============================================================
+async function enviar() {
+    if (emProcessamento) return;
+    const input = document.getElementById('userInput');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    emProcessamento = true;
+    input.value = '';
+    document.getElementById('sendBtn').disabled = true;
+
+    const welcome = document.querySelector('.welcome-card');
+    if (welcome) welcome.remove();
+
+    adicionarMsgUser(texto);
+    const deliberId = mostrarDeliberacao();
+    resetChips();
+
+    try {
+        const resposta = await deliberar(texto, deliberId);
+        removerDeliberacao(deliberId);
+        adicionarMsgGaia(resposta);
+        resetChips();
+    } catch(e) {
+        removerDeliberacao(deliberId);
+        adicionarMsgGaia('Desculpa, ocorreu um erro durante a deliberação. Os órgãos estão a recuperar — tenta novamente.');
+        resetChips();
+        console.error('Erro GAIA:', e);
+    }
+
+    emProcessamento = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+}
+
+// ============================================================
+// DELIBERAÇÃO — o coração da GAIA
+// ============================================================
+async function deliberar(pergunta, deliberId) {
+    const orgaosDeliberantes = ORGAOS.slice(0, 12);
+    const nervo = ORGAOS[12];
+
+    // Todos os órgãos deliberam em paralelo
+    const promessas = orgaosDeliberantes.map(async (orgao) => {
+        atualizarOrdem(deliberId, orgao.id, 'thinking');
+        ativarChip(orgao.id, true);
+
+        try {
+            const prompt = `És o ${orgao.nome} da GAIA — sistema de inteligência coletiva.
+Especialidade: ${orgao.papel}.
+Analisa esta questão e contribui com a tua perspetiva em 2-3 frases objetivas:
+
+"${pergunta}"
+
+Responde diretamente, sem introduções desnecessárias.`;
+
+            const resposta = await puter.ai.chat(prompt, { model: orgao.modelo });
+            const texto = extrairTexto(resposta);
+            atualizarOrdem(deliberId, orgao.id, 'done');
+            return { orgao: orgao.nome, papel: orgao.papel, perspetiva: texto };
+        } catch(e) {
+            atualizarOrdem(deliberId, orgao.id, 'done');
+            return null;
+        }
+    });
+
+    const resultados = (await Promise.all(promessas)).filter(Boolean);
+
+    // NERVO sintetiza tudo
+    atualizarOrdem(deliberId, nervo.id, 'thinking');
+    ativarChip(nervo.id, true);
+
+    const perspectivasTexto = resultados
+        .map(p => `• ${p.orgao}: ${p.perspetiva}`)
+        .join('\n');
+
+    const promptSintese = `És o Nervo Central da GAIA — sintetizador de 13 inteligências coletivas.
+
+Questão do utilizador: "${pergunta}"
+
+Perspetivas dos 12 órgãos:
+${perspectivasTexto}
+
+A tua missão:
+- Sintetiza tudo numa resposta ÚNICA, fluida e coerente
+- Usa UMA só voz — a voz da GAIA
+- Integra os melhores insights de forma harmoniosa
+- Não menciones os órgãos individualmente
+- Usa português europeu, tom cálido e inteligente
+- Responde diretamente à questão
+
+Escreve agora a resposta unificada da GAIA:`;
+
+    let respostaFinal;
+    try {
+        const sintese = await puter.ai.chat(promptSintese, { model: nervo.modelo });
+        respostaFinal = extrairTexto(sintese);
+    } catch(e) {
+        // Fallback: melhor perspetiva disponível
+        respostaFinal = resultados[0]?.perspetiva || 'A GAIA processou a tua questão mas encontrou dificuldades técnicas. Tenta novamente.';
+    }
+
+    atualizarOrdem(deliberId, nervo.id, 'done');
+    return respostaFinal;
+}
+
+// ============================================================
+// UTILITÁRIOS
+// ============================================================
+function extrairTexto(resposta) {
+    if (typeof resposta === 'string') return resposta;
+    if (resposta?.message?.content) {
+        const c = resposta.message.content;
+        if (typeof c === 'string') return c;
+        if (Array.isArray(c)) return c.map(x => x.text || '').join('');
+    }
+    if (resposta?.text) return resposta.text;
+    return String(resposta);
+}
+
+function adicionarMsgUser(texto) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = 'msg user';
+    div.textContent = texto;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function adicionarMsgGaia(texto) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = 'msg gaia';
+    div.innerHTML = `<div class="msg-header">🌍 GAIA</div><div>${texto.replace(/\n/g, '<br>')}</div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function mostrarDeliberacao() {
+    const chat = document.getElementById('chat');
+    const id = 'delib-' + Date.now();
+    const div = document.createElement('div');
+    div.className = 'deliberating';
+    div.id = id;
+
+    const orgaosHTML = ORGAOS.map(o => `
+        <div class="delib-organ" id="${id}-${o.id}">
+            <span>⏳</span> ${o.emoji} ${o.nome}
+        </div>
+    `).join('');
+
+    div.innerHTML = `
+        <div class="delib-header">
+            <div class="spinner"></div>
+            <span>13 inteligências a deliberar...</span>
+        </div>
+        <div class="delib-grid">${orgaosHTML}</div>
+    `;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return id;
+}
+
+function atualizarOrdem(deliberId, orgaoId, estado) {
+    const el = document.getElementById(deliberId + '-' + orgaoId);
+    if (!el) return;
+    el.className = 'delib-organ ' + estado;
+    const icon = el.querySelector('span');
+    if (icon) icon.textContent = estado === 'done' ? '✅' : estado === 'thinking' ? '🔄' : '⏳';
+}
+
+function removerDeliberacao(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+function mostrarToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
+
+console.log('🌍 GAIA v6.0 — 13 inteligências ativas via Puter.js');
+</script>
+</body>
+</html>
