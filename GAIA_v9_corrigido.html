@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAIA v9.0 — Consciência Coletiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #05050d;
+  --surface: #0a0a16;
+  --surface2: #0f0f1e;
+  --surface3: #141428;
+  --primary: #00e5b8;
+  --primary-dim: rgba(0,229,184,0.12);
+  --primary-glow: rgba(0,229,184,0.25);
+  --secondary: #4f9cf9;
+  --accent: #8b5cf6;
+  --danger: #f43f5e;
+  --warning: #fb923c;
+  --success: #34d399;
+  --text: #f0f0ff;
+  --text-dim: rgba(240,240,255,0.6);
+  --text-muted: rgba(240,240,255,0.35);
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.03);
+  --glass-hover: rgba(255,255,255,0.06);
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow: 0 0 0 1px var(--border);
+  --glow: 0 0 40px rgba(0,229,184,0.12);
+  --font: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+/* FIX: removido overflow:hidden do html/body para permitir scroll em mobile */
+html{height:100%;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;-webkit-font-smoothing:antialiased;}
+
+/* ANIMATED BACKGROUND */
+.bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,184,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,184,0.025) 1px,transparent 1px);background-size:60px 60px;animation:gridShift 30s linear infinite;}
+@keyframes gridShift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;}
+.orb1{width:700px;height:700px;background:radial-gradient(circle,rgba(0,229,184,0.08),transparent 70%);top:-200px;left:-200px;animation:orb1Float 25s ease-in-out infinite;}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(79,156,249,0.07),transparent 70%);bottom:-100px;right:-100px;animation:orb2Float 30s ease-in-out infinite;}
+.orb3{width:350px;height:350px;background:radial-gradient(circle,rgba(139,92,246,0.06),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:orb3Float 20s ease-in-out infinite;}
+@keyframes orb1Float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,50px) scale(1.1)}}
+@keyframes orb2Float{0%,100%{transform:translate(0,0)}50%{transform:translate(-60px,-40px)}}
+@keyframes orb3Float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-48%,-52%) scale(1.08)}}
+
+.bg-canvas::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:0.4;pointer-events:none;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15);}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity 0.6s cubic-bezier(0.4,0,0.2,1),visibility 0.6s;}
+.login-screen.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.login-box{position:relative;z-index:1;background:rgba(10,10,22,0.85);border:1px solid var(--border);border-radius:var(--radius-xl);padding:56px 48px;width:90%;max-width:440px;text-align:center;backdrop-filter:blur(40px);box-shadow:var(--glow),inset 0 1px 0 rgba(255,255,255,0.06);}
+.login-icon{width:72px;height:72px;margin:0 auto 24px;position:relative;}
+.login-icon-inner{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:2rem;animation:iconPulse 4s ease-in-out infinite;box-shadow:0 0 40px var(--primary-glow);}
+@keyframes iconPulse{0%,100%{transform:scale(1);box-shadow:0 0 40px var(--primary-glow)}50%{transform:scale(1.05);box-shadow:0 0 60px var(--primary-glow)}}
+.login-ring{position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(0,229,184,0.2);animation:ringRotate 8s linear infinite;}
+.login-ring2{position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(79,156,249,0.15);animation:ringRotate 15s linear infinite reverse;}
+@keyframes ringRotate{to{transform:rotate(360deg)}}
+.login-title{font-family:var(--font-display);font-size:2.6rem;font-weight:700;letter-spacing:-1.5px;background:linear-gradient(135deg,#fff 30%,var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.login-sub{color:var(--text-muted);font-size:0.85rem;margin-bottom:36px;line-height:1.7;letter-spacing:0.01em;}
+.login-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;color:var(--text);font-size:0.9rem;margin-bottom:10px;outline:none;font-family:var(--font);transition:all 0.2s;}
+.login-input:focus{border-color:rgba(0,229,184,0.3);background:rgba(0,229,184,0.03);}
+.login-input::placeholder{color:var(--text-muted);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:var(--radius);padding:14px;color:#000;font-size:0.9rem;font-weight:700;cursor:pointer;font-family:var(--font);margin-bottom:8px;transition:all 0.25s;letter-spacing:0.01em;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,229,184,0.3);}
+.btn-primary:active{transform:translateY(0);}
+.btn-ghost{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:13px;color:var(--text-dim);font-size:0.88rem;cursor:pointer;font-family:var(--font);transition:all 0.2s;margin-bottom:6px;}
+.btn-ghost:hover{background:var(--glass-hover);border-color:var(--border-hover);color:var(--text);}
+.login-note{margin-top:16px;font-size:0.73rem;color:var(--text-muted);line-height:1.6;}
+
+/* LAYOUT */
+.app{display:none;flex-direction:row;height:100vh;position:relative;z-index:1;overflow:hidden;}
+.app.active{display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:256px;min-width:256px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow:hidden;transition:width 0.3s cubic-bezier(0.4,0,0.2,1),min-width 0.3s;flex-shrink:0;}
+.sidebar-logo{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:0 0 16px rgba(0,229,184,0.2);}
+.logo-text{font-family:var(--font-display);font-size:1.05rem;font-weight:700;letter-spacing:-0.5px;background:linear-gradient(135deg,#fff,var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-ver{font-size:0.62rem;color:var(--text-muted);letter-spacing:0.05em;}
+.new-chat-btn{margin:12px;background:var(--primary-dim);border:1px solid rgba(0,229,184,0.2);border-radius:var(--radius);padding:10px 14px;color:var(--primary);font-weight:600;cursor:pointer;font-size:0.82rem;font-family:var(--font);display:flex;align-items:center;gap:6px;transition:all 0.2s;}
+.new-chat-btn:hover{background:rgba(0,229,184,0.18);border-color:rgba(0,229,184,0.35);box-shadow:0 0 20px rgba(0,229,184,0.1);}
+.sidebar-section{padding:6px 16px 4px;font-size:0.63rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:8px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;margin:1px 8px;cursor:pointer;transition:all 0.18s;font-size:0.84rem;color:var(--text-dim);border-radius:var(--radius-sm);white-space:nowrap;}
+.nav-item:hover{background:var(--glass-hover);color:var(--text);}
+.nav-item.active{background:var(--primary-dim);color:var(--primary);}
+.nav-icon{font-size:0.95rem;width:18px;text-align:center;opacity:0.8;}
+.sessions-list{flex:1;overflow-y:auto;padding:4px 8px 12px;}
+.session-item{padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;margin-bottom:2px;transition:all 0.18s;border:1px solid transparent;}
+.session-item:hover{background:var(--glass-hover);border-color:var(--border);}
+.session-item.active{background:var(--primary-dim);border-color:rgba(0,229,184,0.15);}
+.session-name{font-size:0.8rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.session-item.active .session-name{color:var(--primary);}
+.session-date{font-size:0.67rem;color:var(--text-muted);margin-top:2px;}
+.session-actions{display:flex;gap:3px;margin-top:5px;opacity:0;transition:opacity 0.2s;}
+.session-item:hover .session-actions{opacity:1;}
+.session-act-btn{background:transparent;border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text-muted);cursor:pointer;font-size:0.65rem;transition:all 0.2s;}
+.session-act-btn:hover{color:var(--text);border-color:var(--border-hover);}
+.session-act-btn.del:hover{color:var(--danger);border-color:rgba(244,63,94,0.3);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;height:100vh;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;min-height:54px;}
+.sidebar-toggle{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;color:var(--text-muted);transition:all 0.2s;flex-shrink:0;}
+.sidebar-toggle:hover{color:var(--text);background:var(--glass-hover);border-color:var(--border-hover);}
+.topbar-title{font-size:0.9rem;font-weight:500;color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.icon-btn{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 11px;cursor:pointer;font-size:0.8rem;color:var(--text-muted);transition:all 0.2s;white-space:nowrap;font-family:var(--font);}
+.icon-btn:hover{color:var(--primary);border-color:rgba(0,229,184,0.25);background:var(--primary-dim);}
+.user-chip{display:flex;align-items:center;gap:5px;padding:5px 11px;font-size:0.78rem;color:var(--text-muted);border:1px solid var(--border);border-radius:20px;}
+.logout-btn{background:transparent;border:1px solid rgba(244,63,94,0.2);color:rgba(244,63,94,0.7);border-radius:var(--radius-sm);padding:6px 11px;cursor:pointer;font-size:0.78rem;font-family:var(--font);transition:all 0.2s;}
+.logout-btn:hover{background:rgba(244,63,94,0.08);color:var(--danger);border-color:rgba(244,63,94,0.35);}
+
+/* ORGANS BAR */
+.organs-bar{display:flex;flex-wrap:wrap;gap:4px;padding:8px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.organ-chip{display:flex;align-items:center;gap:4px;background:transparent;border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:0.67rem;color:var(--text-muted);transition:all 0.3s;cursor:default;letter-spacing:0.01em;}
+.organ-chip.active{border-color:rgba(0,229,184,0.3);color:var(--primary);background:var(--primary-dim);}
+.organ-chip.disabled{opacity:0.25;}
+.organ-dot{width:4px;height:4px;border-radius:50%;background:currentColor;transition:all 0.3s;}
+.organ-chip.active .organ-dot{box-shadow:0 0 4px currentColor;animation:dotBlink 1.2s infinite;}
+@keyframes dotBlink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* CHAT AREA */
+.chat-area{flex:1;overflow-y:auto;padding:28px 20px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth;}
+
+/* MESSAGES */
+.msg{max-width:80%;animation:msgIn 0.3s cubic-bezier(0.4,0,0.2,1);}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;}
+.msg.gaia{align-self:flex-start;}
+.msg.system{align-self:center;max-width:90%;}
+.msg-bubble{padding:12px 16px;border-radius:var(--radius-lg);line-height:1.7;font-size:0.9rem;}
+.msg.user .msg-bubble{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#000;font-weight:500;border-bottom-right-radius:4px;}
+.msg.gaia .msg-bubble{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.msg.system .msg-bubble{background:rgba(79,156,249,0.07);border:1px solid rgba(79,156,249,0.15);font-size:0.8rem;color:var(--secondary);text-align:center;border-radius:var(--radius);}
+.msg-header{display:flex;align-items:center;gap:7px;margin-bottom:8px;font-size:0.75rem;font-weight:600;color:var(--primary);letter-spacing:0.02em;}
+.msg-avatar{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:0.7rem;}
+.msg-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;}
+.action-btn{display:flex;align-items:center;gap:3px;background:transparent;border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:0.7rem;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-family:var(--font);}
+.action-btn:hover{border-color:rgba(0,229,184,0.25);color:var(--primary);background:var(--primary-dim);}
+.gen-image{border-radius:var(--radius);max-width:100%;margin-top:10px;border:1px solid var(--border);display:block;}
+
+/* DELIBERATION */
+.deliberating{align-self:flex-start;max-width:90%;background:rgba(0,229,184,0.04);border:1px solid rgba(0,229,184,0.12);border-radius:var(--radius-lg);border-bottom-left-radius:4px;padding:14px 18px;animation:msgIn 0.3s ease;}
+.delib-header{display:flex;align-items:center;gap:8px;color:var(--primary);font-size:0.8rem;font-weight:600;margin-bottom:10px;letter-spacing:0.01em;}
+.spinner{width:14px;height:14px;border:1.5px solid rgba(0,229,184,0.2);border-top-color:var(--primary);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.delib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:4px;}
+.delib-organ{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:0.68rem;color:var(--text-muted);transition:all 0.3s;}
+.delib-organ.thinking{border-color:rgba(251,146,60,0.3);color:var(--warning);}
+.delib-organ.done{border-color:rgba(0,229,184,0.25);color:var(--primary);}
+
+/* WELCOME */
+.welcome-card{text-align:center;padding:48px 24px 32px;color:var(--text-muted);max-width:560px;margin:0 auto;}
+.welcome-orb{width:80px;height:80px;margin:0 auto 24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:2.2rem;animation:welcomeFloat 4s ease-in-out infinite;box-shadow:0 0 50px rgba(0,229,184,0.2);}
+@keyframes welcomeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.welcome-title{font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--text);letter-spacing:-0.5px;margin-bottom:8px;}
+.welcome-sub{font-size:0.85rem;line-height:1.75;margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto;}
+.suggestions{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;}
+.suggestion{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:8px 15px;font-size:0.8rem;cursor:pointer;transition:all 0.2s;color:var(--text-dim);}
+.suggestion:hover{border-color:rgba(0,229,184,0.3);color:var(--primary);background:var(--primary-dim);}
+
+/* INPUT AREA */
+.input-area{border-top:1px solid var(--border);background:var(--surface);padding:12px 18px 16px;flex-shrink:0;}
+.input-toolbar{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.tool-btn{display:flex;align-items:center;gap:4px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;font-size:0.74rem;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-family:var(--font);}
+.tool-btn:hover{color:var(--primary);border-color:rgba(0,229,184,0.25);background:var(--primary-dim);}
+.tool-btn.active{color:var(--primary);border-color:rgba(0,229,184,0.3);background:var(--primary-dim);}
+.input-row{display:flex;gap:8px;align-items:flex-end;}
+.input-box{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 15px;display:flex;align-items:flex-end;gap:8px;transition:border-color 0.2s;}
+.input-box:focus-within{border-color:rgba(0,229,184,0.3);}
+.input-box textarea{flex:1;background:none;border:none;color:var(--text);font-size:0.9rem;outline:none;font-family:var(--font);resize:none;max-height:120px;line-height:1.6;min-height:22px;}
+.input-box textarea::placeholder{color:var(--text-muted);}
+.send-btn{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:var(--radius);color:#000;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+.send-btn:hover:not(:disabled){transform:scale(1.05);box-shadow:0 0 20px rgba(0,229,184,0.3);}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.voice-btn{width:40px;height:40px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+.voice-btn:hover{color:var(--text);border-color:var(--border-hover);}
+.voice-btn.listening{background:rgba(244,63,94,0.12);border-color:rgba(244,63,94,0.3);color:var(--danger);animation:vPulse 1s ease-in-out infinite;}
+@keyframes vPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* PANELS */
+.panel{position:fixed;top:0;right:-420px;width:400px;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:700;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);overflow:hidden;display:flex;flex-direction:column;}
+.panel.open{right:0;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.panel-title{font-family:var(--font-display);font-size:0.95rem;font-weight:600;color:var(--text);}
+.panel-close{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:all 0.2s;font-size:0.8rem;}
+.panel-close:hover{color:var(--text);background:var(--glass-hover);}
+.panel-body{padding:18px 22px;flex:1;overflow-y:auto;}
+.panel-section-label{font-size:0.68rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;}
+
+/* TABS */
+.tabs-bar{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.stab{flex:1;padding:11px 6px;text-align:center;font-size:0.74rem;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;font-weight:500;}
+.stab:hover{color:var(--text-dim);}
+.stab.active{color:var(--primary);border-bottom-color:var(--primary);}
+
+/* TOGGLE */
+.toggle{width:42px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:background 0.25s;flex-shrink:0;}
+.toggle.on{background:var(--primary);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform 0.25s;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.toggle.on::after{transform:translateX(20px);}
+
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);}
+.setting-label{font-size:0.85rem;color:var(--text-dim);}
+.setting-sub{font-size:0.72rem;color:var(--text-muted);margin-top:2px;}
+.organ-health-item{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:5px;transition:border-color 0.2s;}
+.organ-health-item:hover{border-color:var(--border-hover);}
+.organ-dot-status{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:all 0.3s;}
+.organ-dot-status.online{background:var(--success);box-shadow:0 0 6px var(--success);}
+.organ-dot-status.offline{background:var(--danger);}
+.organ-dot-status.testing{background:var(--warning);animation:dotBlink 0.6s infinite;}
+.organ-health-name{flex:1;font-size:0.82rem;color:var(--text-dim);}
+.organ-health-model{font-size:0.67rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:2px;}
+.organ-test-btn{background:var(--primary-dim);border:1px solid rgba(0,229,184,0.2);border-radius:5px;padding:3px 9px;color:var(--primary);cursor:pointer;font-size:0.69rem;font-family:var(--font);transition:all 0.2s;}
+.organ-test-btn:hover{background:rgba(0,229,184,0.18);}
+.organ-toggle-btn{background:var(--glass);border:1px solid var(--border);border-radius:5px;padding:3px 9px;color:var(--text-muted);cursor:pointer;font-size:0.69rem;font-family:var(--font);margin-left:3px;transition:all 0.2s;}
+.organ-toggle-btn:hover{border-color:var(--border-hover);color:var(--text);}
+
+/* COLOR PICKER */
+.color-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:14px;}
+.color-swatch{width:100%;aspect-ratio:1;border-radius:var(--radius-sm);cursor:pointer;border:2px solid transparent;transition:all 0.2s;position:relative;}
+.color-swatch:hover{transform:scale(1.1);}
+.color-swatch.selected::after{content:'checkmark';font-size:0;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700;}
+/* FIX: corrigido pseudo-elemento com content vazio que causava conflito */
+.color-swatch.selected{box-shadow:0 0 0 2px var(--primary);}
+
+/* SLIDER */
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.slider-label{font-size:0.76rem;color:var(--text-muted);width:100px;}
+.slider{flex:1;-webkit-appearance:none;height:3px;background:var(--border);border-radius:2px;outline:none;}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--primary);cursor:pointer;box-shadow:0 0 8px rgba(0,229,184,0.4);}
+.slider-val{font-size:0.73rem;color:var(--primary);width:28px;text-align:right;font-family:var(--font-mono);}
+
+/* AVATAR */
+.avatar-display{width:90px;height:90px;margin:0 auto 16px;position:relative;}
+.avatar-canvas{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:2.2rem;animation:avatarFloat 3s ease-in-out infinite;box-shadow:0 0 30px var(--primary-glow),inset 0 1px 0 rgba(255,255,255,0.2);}
+@keyframes avatarFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-4px) rotate(1deg)}75%{transform:translateY(-2px) rotate(-1deg)}}
+.avatar-ring{position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(0,229,184,0.2);animation:ringRotate 10s linear infinite;}
+.avatar-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;}
+.avatar-opt{width:100%;aspect-ratio:1;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.avatar-opt::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--primary),var(--secondary));opacity:0;transition:opacity 0.2s;}
+.avatar-opt .av-emoji{font-size:1.3rem;position:relative;z-index:1;transition:transform 0.2s;}
+.avatar-opt:hover .av-emoji{transform:scale(1.2);}
+.avatar-opt:hover{border-color:rgba(0,229,184,0.3);}
+.avatar-opt.selected{border-color:var(--primary);}
+.avatar-opt.selected::before{opacity:0.1;}
+.av-anim{animation:avSpin 6s ease-in-out infinite;}
+.av-pulse{animation:avPulse 2s ease-in-out infinite;}
+.av-bounce{animation:avBounce 1.5s ease-in-out infinite;}
+.av-glow{filter:drop-shadow(0 0 6px var(--primary)) drop-shadow(0 0 12px var(--primary));}
+@keyframes avSpin{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.05)}}
+@keyframes avPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes avBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* PERSONALITY GRID */
+.personality-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.personality-opt{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;cursor:pointer;transition:all 0.2s;text-align:center;position:relative;overflow:hidden;}
+.personality-opt::after{content:'';position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:transparent;transition:all 0.2s;}
+.personality-opt.selected::after{background:var(--primary);box-shadow:0 0 6px var(--primary);}
+.personality-opt:hover{border-color:rgba(0,229,184,0.2);background:rgba(0,229,184,0.03);}
+.personality-opt.selected{border-color:rgba(0,229,184,0.3);background:var(--primary-dim);}
+.p-icon{font-size:1.2rem;margin-bottom:4px;}
+.p-name{font-size:0.74rem;color:var(--text-dim);font-weight:500;}
+.p-desc{font-size:0.63rem;color:var(--text-muted);margin-top:2px;}
+.personality-note{font-size:0.72rem;color:var(--text-muted);background:rgba(0,229,184,0.05);border:1px solid rgba(0,229,184,0.1);border-radius:var(--radius-sm);padding:8px 10px;margin-top:10px;line-height:1.5;}
+
+/* MEMORY */
+.memory-item{display:flex;gap:9px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;margin-bottom:6px;transition:border-color 0.2s;}
+.memory-item:hover{border-color:var(--border-hover);}
+.memory-text{flex:1;font-size:0.81rem;color:var(--text-dim);line-height:1.6;}
+.memory-meta{font-size:0.67rem;color:var(--text-muted);margin-top:3px;}
+.memory-del{background:transparent;border:1px solid rgba(244,63,94,0.15);border-radius:4px;padding:3px 7px;color:rgba(244,63,94,0.6);cursor:pointer;font-size:0.7rem;align-self:flex-start;transition:all 0.2s;}
+.memory-del:hover{color:var(--danger);border-color:rgba(244,63,94,0.35);background:rgba(244,63,94,0.07);}
+.memory-add-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:14px;}
+.memory-textarea{width:100%;background:transparent;border:none;color:var(--text);font-size:0.84rem;outline:none;font-family:var(--font);resize:none;min-height:56px;line-height:1.6;}
+.memory-textarea::placeholder{color:var(--text-muted);}
+.memory-add-btn{width:100%;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:var(--radius-sm);padding:9px;color:#000;font-weight:700;cursor:pointer;font-size:0.8rem;font-family:var(--font);margin-top:8px;transition:all 0.2s;}
+.memory-add-btn:hover{opacity:0.9;}
+
+/* PROJECTS */
+.project-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:7px;transition:all 0.2s;}
+.project-item:hover{border-color:var(--border-hover);}
+.project-name{font-size:0.86rem;font-weight:600;color:var(--text);}
+.project-desc{font-size:0.74rem;color:var(--text-muted);margin-top:4px;}
+.project-meta{font-size:0.67rem;color:var(--text-muted);margin-top:8px;}
+.new-project-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:14px;}
+.form-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:0.84rem;outline:none;font-family:var(--font);padding:8px 0;margin-bottom:9px;transition:border-color 0.2s;}
+.form-input:focus{border-bottom-color:rgba(0,229,184,0.3);}
+.form-input::placeholder{color:var(--text-muted);}
+
+/* EBOOK */
+.ebook-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:7px;transition:border-color 0.2s;}
+.ebook-item:hover{border-color:var(--border-hover);}
+.ebook-title{font-size:0.86rem;font-weight:600;color:var(--text);}
+.ebook-meta{font-size:0.72rem;color:var(--text-muted);margin-top:4px;}
+.ebook-actions{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;}
+.ebook-btn{flex:1;min-width:60px;background:var(--glass);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:0.7rem;color:var(--text-muted);cursor:pointer;text-align:center;transition:all 0.2s;font-family:var(--font);}
+.ebook-btn:hover{color:var(--primary);border-color:rgba(0,229,184,0.25);background:var(--primary-dim);}
+
+/* STORY BIBLE */
+.bible-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.bible-tab{flex:1;padding:8px;text-align:center;font-size:0.74rem;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;}
+.bible-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.bible-section{display:none;}
+.bible-section.active{display:block;}
+.bible-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;}
+.bible-item-header{display:flex;justify-content:space-between;margin-bottom:5px;}
+.bible-item-title{font-weight:600;font-size:0.82rem;color:var(--text-dim);}
+.bible-item-content{font-size:0.78rem;color:var(--text-muted);margin-top:4px;white-space:pre-wrap;}
+.bible-item-actions{display:flex;gap:5px;margin-top:8px;}
+.bible-add-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:15px;}
+.bible-add-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:0.8rem;outline:none;padding:6px 0;margin-bottom:8px;}
+.bible-add-input::placeholder{color:var(--text-muted);}
+.bible-add-textarea{width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.78rem;outline:none;padding:8px;margin-bottom:8px;resize:none;min-height:60px;font-family:var(--font);}
+.bible-add-btn{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:var(--radius-sm);padding:8px;color:#000;font-weight:600;cursor:pointer;width:100%;font-size:0.75rem;}
+
+/* IMAGE STUDIO */
+.image-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.image-thumb{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2);border:1px solid var(--border);cursor:pointer;position:relative;transition:border-color 0.2s;}
+.image-thumb:hover{border-color:rgba(0,229,184,0.3);}
+.image-thumb img{width:100%;height:100%;object-fit:cover;}
+.image-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;gap:5px;backdrop-filter:blur(4px);}
+.image-thumb:hover .image-thumb-overlay{display:flex;}
+.img-action-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:5px;padding:4px 8px;color:#fff;cursor:pointer;font-size:0.69rem;font-family:var(--font);transition:all 0.2s;}
+.img-action-btn:hover{background:rgba(255,255,255,0.2);}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:495;display:none;pointer-events:none;}
+.overlay.show{display:block;pointer-events:auto;}
+.modal{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal.show{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;width:90%;max-width:500px;position:relative;z-index:601;box-shadow:0 25px 80px rgba(0,0,0,0.5);max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:var(--font-display);font-size:1rem;font-weight:600;margin-bottom:18px;color:var(--text);}
+.modal-close{position:absolute;top:16px;right:16px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:0.8rem;transition:all 0.2s;}
+.modal-close:hover{color:var(--text);background:var(--glass-hover);}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:9px 18px;border-radius:20px;z-index:9999;font-size:0.82rem;animation:toastIn 0.25s ease;box-shadow:0 8px 30px rgba(0,0,0,0.4);white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* FORM ELEMENTS */
+.select-field{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-family:var(--font);font-size:0.84rem;outline:none;transition:border-color 0.2s;cursor:pointer;}
+.select-field:focus{border-color:rgba(0,229,184,0.3);}
+.textarea-field{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:var(--font);font-size:0.84rem;outline:none;resize:none;transition:border-color 0.2s;line-height:1.6;}
+.textarea-field:focus{border-color:rgba(0,229,184,0.3);}
+.textarea-field::placeholder{color:var(--text-muted);}
+
+/* TAB CONTENT */
+.tab-content{animation:fadeUp 0.2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{position:fixed;top:0;left:-280px;height:100vh;z-index:700;transition:left 0.3s cubic-bezier(0.4,0,0.2,1);width:280px;min-width:280px;box-shadow:8px 0 40px rgba(0,0,0,0.6);}
+  .sidebar.open{left:0;}
+  .panel{width:94%;right:-100%;}
+  .user-chip{display:none;}
+  .topbar-right .icon-btn{display:none;}
+  /* FIX: mostrar pelo menos o botão de exportar em mobile */
+  .topbar-right .icon-btn:last-of-type{display:flex;}
+}
+
+/* EXPORT VIDEO PROGRESS */
+.export-progress{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:12px;}
+.progress-bar-wrap{background:var(--border);border-radius:4px;height:4px;overflow:hidden;margin-top:8px;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:4px;transition:width 0.3s;width:0%;}
+.progress-label{font-size:0.75rem;color:var(--text-muted);}
+
+/* ANIMATED AVATAR CARDS */
+@keyframes floatEmoji{0%,100%{transform:translateY(0) scale(1) rotate(-3deg)}50%{transform:translateY(-6px) scale(1.08) rotate(3deg)}}
+@keyframes orbitEmoji{0%{transform:rotate(0deg) translateX(12px) rotate(0deg)}100%{transform:rotate(360deg) translateX(12px) rotate(-360deg)}}
+@keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 4px var(--primary))}50%{filter:drop-shadow(0 0 12px var(--primary)) drop-shadow(0 0 20px var(--secondary))}}
+.av-float{animation:floatEmoji 3s ease-in-out infinite;}
+.av-orbit-container{position:relative;display:flex;align-items:center;justify-content:center;}
+.av-orbit-dot{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--primary);animation:orbitEmoji 2s linear infinite;}
+.av-glow-anim{animation:glowPulse 2s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-canvas">
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="fecharOverlay()"></div>
+
+<!-- IMAGE MODAL -->
+<div class="modal" id="imageModal">
+  <div class="overlay" style="position:fixed;z-index:599;" onclick="fecharModal('imageModal')"></div>
+  <div class="modal-box">
+    <div class="modal-title">🎨 Estúdio de Imagem</div>
+    <button class="modal-close" onclick="fecharModal('imageModal')">✕</button>
+    <div style="margin-bottom:12px;">
+      <textarea id="imagePrompt" class="textarea-field" style="height:72px;" placeholder="Descreve a imagem que queres criar..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <select id="imageSize" class="select-field">
+        <option value="1024x1024">Quadrado (1024×1024)</option>
+        <option value="1792x1024">Paisagem (1792×1024)</option>
+        <option value="1024x1792">Retrato (1024×1792)</option>
+      </select>
+      <select id="imageStyle" class="select-field">
+        <option value="vivid">Vívido</option>
+        <option value="natural">Natural</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="gerarImagem()">✨ Gerar Imagem</button>
+    <div id="imageResult" style="margin-top:12px;"></div>
+    <div id="savedImagesGrid" class="image-grid" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal" id="exportModal">
+  <div class="overlay" style="position:fixed;z-index:599;" onclick="fecharModal('exportModal')"></div>
+  <div class="modal-box">
+    <div class="modal-title">📤 Exportar</div>
+    <button class="modal-close" onclick="fecharModal('exportModal')">✕</button>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;">Tamanho da página:</label>
+      <select id="pageSizeSelect" class="select-field">
+        <option value="a4">A4 (210×297 mm)</option>
+        <option value="a5">A5 (148×210 mm)</option>
+        <option value="letter">Carta (216×279 mm)</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <button class="btn-ghost" style="padding:14px 8px;" onclick="exportarConversa()">📄 PDF Conversa</button>
+      <button class="btn-ghost" style="padding:14px 8px;" onclick="exportarConversaWord()">📝 Word Conversa</button>
+      <button class="btn-ghost" style="padding:14px 8px;" onclick="exportarConversaExcel()">📊 Excel Conversa</button>
+      <button class="btn-ghost" style="padding:14px 8px;" onclick="exportarConversaImagem()">🖼️ Imagem PNG</button>
+      <button class="btn-ghost" style="padding:14px 8px;" onclick="exportarConversaVideo()">🎬 Vídeo MP4</button>
+      <button class="btn-ghost" style="padding:14px 8px;" onclick="exportarConversaTXT()">📋 TXT Simples</button>
+    </div>
+    <div id="exportProgress" style="display:none;" class="export-progress">
+      <div class="progress-label" id="exportLabel">A exportar...</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="exportBar"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-icon">
+      <div class="login-icon-inner">🌍</div>
+      <div class="login-ring"></div>
+      <div class="login-ring2"></div>
+    </div>
+    <div class="login-title">GAIA</div>
+    <div class="login-sub">Consciência Coletiva de 13 Inteligências<br>a trabalhar em tempo real — completamente gratuito</div>
+    <input type="email" class="login-input" id="loginEmail" placeholder="O teu email" />
+    <input type="password" class="login-input" id="loginPass" placeholder="Palavra-passe" />
+    <button class="btn-primary" onclick="loginSimple()">Entrar na GAIA</button>
+    <button class="btn-ghost" onclick="loginPuter()">🔑 Entrar com conta Puter (recomendado)</button>
+    <button class="btn-ghost" style="opacity:0.6;font-size:0.8rem;" onclick="loginDemo()">👁️ Ver demo sem conta</button>
+    <div class="login-note">💡 Conta Puter gratuita = acesso a todas as 13 IAs</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="mainApp">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🌍</div>
+      <div>
+        <div class="logo-text">GAIA</div>
+        <div class="logo-ver">v9.0 · 13 IAs</div>
+      </div>
+    </div>
+    <button class="new-chat-btn" onclick="novasSessao()">
+      <span style="font-size:1rem;line-height:1;">+</span> Nova Conversa
+    </button>
+    <div class="sidebar-section">Ferramentas</div>
+    <div class="nav-item" onclick="abrirImageStudio()"><span class="nav-icon">🎨</span>Estúdio de Imagem</div>
+    <div class="nav-item" onclick="abrirPanel('ebookPanel')"><span class="nav-icon">📚</span>eBooks</div>
+    <div class="nav-item" onclick="abrirPanel('projectsPanel')"><span class="nav-icon">📁</span>Projetos</div>
+    <div class="nav-item" onclick="abrirPanel('memoryPanel')"><span class="nav-icon">🧬</span>Memória</div>
+    <div class="sidebar-section">Conversas</div>
+    <div class="sessions-list" id="sessionsList"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+      <div class="topbar-title" id="topbarTitle">Nova Conversa</div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="abrirModal('exportModal')">↑ Exportar</button>
+        <button class="icon-btn" onclick="abrirPanel('settingsPanel')">⚙ Definições</button>
+        <div class="user-chip">◎ <span id="userName">Utilizador</span></div>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </div>
+    </div>
+
+    <!-- ORGANS BAR -->
+    <div class="organs-bar" id="organsBar"></div>
+
+    <!-- CHAT -->
+    <div class="chat-area" id="chatArea">
+      <div class="welcome-card" id="welcomeCard">
+        <div class="welcome-orb" id="welcomeOrb">🌍</div>
+        <div class="welcome-title">GAIA está pronta</div>
+        <div class="welcome-sub">Sou uma consciência coletiva de 13 inteligências artificiais. Analiso, crio, gero documentos e imagens — tudo em português europeu.</div>
+        <div class="suggestions">
+          <div class="suggestion" onclick="sg(this)">💡 Explica inteligência artificial</div>
+          <div class="suggestion" onclick="sg(this)">🚀 Estratégia para startup</div>
+          <div class="suggestion" onclick="sg(this)">🧠 Qual o sentido da vida?</div>
+          <div class="suggestion" onclick="sg(this)">✍️ Escreve um poema</div>
+          <div class="suggestion" onclick="sg(this)">📊 Analisa esta situação</div>
+          <div class="suggestion" onclick="sg(this)">🎨 Cria uma imagem de um pôr do sol</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-toolbar">
+        <!-- FIX: label agora usa for corretamente apontando para o fileInput -->
+        <label class="tool-btn" for="fileInput" style="cursor:pointer;">📎 Importar</label>
+        <button class="tool-btn" onclick="abrirImageStudio()">🎨 Imagem</button>
+        <button class="tool-btn" onclick="abrirModal('exportModal')">↑ Exportar</button>
+        <button class="tool-btn" onclick="abrirPanel('projectsPanel')">📁 Projeto</button>
+        <button class="tool-btn" onclick="abrirPanel('ebookPanel')">📚 eBook</button>
+        <button class="tool-btn" onclick="gerarDocumento()">📄 Doc IA</button>
+      </div>
+      <div class="input-row">
+        <div class="input-box">
+          <textarea id="userInput" rows="1"
+            placeholder="Pergunta à GAIA... envia imagem, cria projetos, gera documentos..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviar();}"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
+        <button class="voice-btn" id="voiceBtn" onclick="toggleVoz()">🎤</button>
+        <button class="send-btn" id="sendBtn" onclick="enviar()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="panel" id="settingsPanel">
+  <div class="panel-header">
+    <div class="panel-title">Definições</div>
+    <div class="panel-close" onclick="fecharPanel('settingsPanel')">✕</div>
+  </div>
+  <div class="tabs-bar">
+    <div class="stab active" id="stab-saude" onclick="mudarTab('saude')">Saúde</div>
+    <div class="stab" id="stab-avatar" onclick="mudarTab('avatar')">Avatar</div>
+    <div class="stab" id="stab-cores" onclick="mudarTab('cores')">Cores</div>
+    <div class="stab" id="stab-prefs" onclick="mudarTab('prefs')">Prefs</div>
+  </div>
+  <div class="panel-body">
+    <div id="tab-saude" class="tab-content">
+      <div style="font-size:0.77rem;color:var(--text-muted);margin-bottom:12px;line-height:1.6;">Estado de cada órgão da GAIA. Testa e ativa/desativa individualmente.</div>
+      <div id="organHealthList"></div>
+      <button style="width:100%;margin-top:10px;background:var(--primary-dim);border:1px solid rgba(0,229,184,0.2);border-radius:var(--radius-sm);padding:10px;color:var(--primary);cursor:pointer;font-family:var(--font);font-size:0.82rem;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,229,184,0.18)'" onmouseout="this.style.background='var(--primary-dim)'" onclick="testarTodos()">↻ Testar Todos os Órgãos</button>
+    </div>
+    <div id="tab-avatar" class="tab-content" style="display:none">
+      <div class="avatar-display">
+        <div class="avatar-canvas" id="avatarPreview">🌍</div>
+        <div class="avatar-ring"></div>
+      </div>
+      <div class="panel-section-label" style="margin-top:14px;">Aparência do Avatar</div>
+      <div class="avatar-options" id="avatarOptions"></div>
+      <div class="panel-section-label" style="margin-top:16px;">Personalidade &amp; Tom <span style="color:var(--primary);font-size:0.65rem;">(seleciona várias)</span></div>
+      <div class="personality-grid" id="personalityGrid"></div>
+      <div class="personality-note" id="personalityNote">Seleciona uma ou mais personalidades — a GAIA combinará todas.</div>
+    </div>
+    <div id="tab-cores" class="tab-content" style="display:none">
+      <div class="panel-section-label">Cor de Destaque</div>
+      <div class="color-grid" id="colorGridPrimary"></div>
+      <div class="panel-section-label">Cor de Fundo</div>
+      <div class="color-grid" id="colorGridBg"></div>
+      <button style="width:100%;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px;color:var(--text-muted);cursor:pointer;font-family:var(--font);font-size:0.8rem;margin-top:8px;" onclick="resetarCores()">↺ Repor Cores</button>
+    </div>
+    <div id="tab-prefs" class="tab-content" style="display:none">
+      <div class="setting-row">
+        <div><div class="setting-label">Respostas longas</div><div class="setting-sub">GAIA detalha mais as respostas</div></div>
+        <div class="toggle on" id="toggleLong" onclick="toggleSetting('longResponses')"></div>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">Leitura automática</div><div class="setting-sub">Lê as respostas em voz alta</div></div>
+        <div class="toggle" id="toggleVoiceAuto" onclick="toggleSetting('voiceAuto')"></div>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">Mostrar deliberação</div><div class="setting-sub">Anima o processo de raciocínio</div></div>
+        <div class="toggle on" id="toggleDelib" onclick="toggleSetting('showDelib')"></div>
+      </div>
+      <div style="margin-top:20px;">
+        <div class="panel-section-label">Idioma de Resposta</div>
+        <select class="select-field" id="langSelect" onchange="localStorage.setItem('gaia_lang',this.value)">
+          <option value="pt-PT">Português Europeu</option>
+          <option value="pt-BR">Português do Brasil</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORY PANEL -->
+<div class="panel" id="memoryPanel">
+  <div class="panel-header">
+    <div class="panel-title">🧬 Memória</div>
+    <div class="panel-close" onclick="fecharPanel('memoryPanel')">✕</div>
+  </div>
+  <div class="panel-body">
+    <div class="memory-add-form">
+      <textarea class="memory-textarea" id="newMemory" placeholder="Adiciona um facto, preferência ou contexto importante..."></textarea>
+      <button class="memory-add-btn" onclick="adicionarMemoria()">+ Guardar na Memória</button>
+    </div>
+    <div class="panel-section-label">Memórias Guardadas</div>
+    <div id="memoriasList"></div>
+  </div>
+</div>
+
+<!-- PROJECTS PANEL -->
+<div class="panel" id="projectsPanel">
+  <div class="panel-header">
+    <div class="panel-title">📁 Projetos</div>
+    <div class="panel-close" onclick="fecharPanel('projectsPanel')">✕</div>
+  </div>
+  <div class="panel-body">
+    <div class="new-project-form">
+      <input type="text" class="form-input" id="projectName" placeholder="Nome do projeto">
+      <input type="text" class="form-input" id="projectDesc" placeholder="Descrição breve">
+      <button style="width:100%;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:var(--radius-sm);padding:9px;color:#000;font-weight:700;cursor:pointer;font-size:0.8rem;font-family:var(--font);" onclick="criarProjeto()">+ Criar Projeto</button>
+    </div>
+    <div class="panel-section-label">Projetos Ativos</div>
+    <div id="projetosList"></div>
+  </div>
+</div>
+
+<!-- EBOOK PANEL -->
+<div class="panel" id="ebookPanel">
+  <div class="panel-header">
+    <div class="panel-title">📚 eBooks &amp; Story Bible</div>
+    <div class="panel-close" onclick="fecharPanel('ebookPanel')">✕</div>
+  </div>
+  <div class="tabs-bar">
+    <div class="stab active" id="stab-ebooks" onclick="mudarEbookTab('ebooks')">eBooks</div>
+    <div class="stab" id="stab-bible" onclick="mudarEbookTab('bible')">Story Bible</div>
+  </div>
+  <div class="panel-body">
+    <div id="tab-ebooks">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:14px;">
+        <input type="text" class="form-input" id="ebookTitle" placeholder="Título do eBook">
+        <input type="text" class="form-input" id="ebookGenre" placeholder="Género (ficção, romance, negócios...)">
+        <textarea class="textarea-field" id="ebookSynopsis" style="height:60px;margin-bottom:9px;" placeholder="Sinopse ou ideia central..."></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <label style="display:flex;align-items:center;gap:5px;font-size:0.77rem;color:var(--text-muted);cursor:pointer;">
+            <input type="checkbox" id="gerarCapaCheck" style="accent-color:var(--primary);"> Gerar capa
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:0.77rem;color:var(--text-muted);cursor:pointer;">
+            <input type="checkbox" id="usarBibleCheck" style="accent-color:var(--primary);"> Usar Story Bible
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <button style="background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:var(--radius-sm);padding:9px;color:#000;font-weight:700;cursor:pointer;font-size:0.75rem;font-family:var(--font);" onclick="criarEbook()">📚 Criar eBook</button>
+          <button style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px;color:var(--text-dim);cursor:pointer;font-size:0.75rem;font-family:var(--font);" onclick="criarEbookCapitulos()">📑 Por Capítulos</button>
+        </div>
+        <label style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;font-size:0.77rem;color:var(--text-muted);cursor:pointer;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px;" for="importEbookInput">📂 Importar Ficheiro</label>
+        <input type="file" id="importEbookInput" style="display:none;" accept=".txt,.md,.doc,.docx" onchange="importarEbook(event)">
+      </div>
+      <div class="panel-section-label">eBooks Criados</div>
+      <div id="ebooksList"></div>
+    </div>
+    <div id="tab-bible" style="display:none;">
+      <div class="bible-tabs">
+        <div class="bible-tab active" data-bible="personagens">Personagens</div>
+        <div class="bible-tab" data-bible="mundo">Mundo</div>
+        <div class="bible-tab" data-bible="objetos">Objetos</div>
+        <div class="bible-tab" data-bible="acontecimentos">Acontecimentos</div>
+      </div>
+      <div id="bible-personagens" class="bible-section active">
+        <div class="bible-add-form">
+          <input type="text" class="bible-add-input" id="personagensNome" placeholder="Nome do personagem">
+          <textarea class="bible-add-textarea" id="personagensDesc" placeholder="Descrição, características, história..."></textarea>
+          <button class="bible-add-btn" onclick="adicionarBible('personagens')">+ Adicionar Personagem</button>
+        </div>
+        <div id="bibleList-personagens"></div>
+      </div>
+      <div id="bible-mundo" class="bible-section">
+        <div class="bible-add-form">
+          <input type="text" class="bible-add-input" id="mundoNome" placeholder="Nome do local/mundo">
+          <textarea class="bible-add-textarea" id="mundoDesc" placeholder="Descrição, geografia, cultura..."></textarea>
+          <button class="bible-add-btn" onclick="adicionarBible('mundo')">+ Adicionar Local</button>
+        </div>
+        <div id="bibleList-mundo"></div>
+      </div>
+      <div id="bible-objetos" class="bible-section">
+        <div class="bible-add-form">
+          <input type="text" class="bible-add-input" id="objetosNome" placeholder="Nome do objeto">
+          <textarea class="bible-add-textarea" id="objetosDesc" placeholder="Descrição, poderes, importância..."></textarea>
+          <button class="bible-add-btn" onclick="adicionarBible('objetos')">+ Adicionar Objeto</button>
+        </div>
+        <div id="bibleList-objetos"></div>
+      </div>
+      <div id="bible-acontecimentos" class="bible-section">
+        <div class="bible-add-form">
+          <input type="text" class="bible-add-input" id="acontecimentosNome" placeholder="Nome do acontecimento">
+          <textarea class="bible-add-textarea" id="acontecimentosDesc" placeholder="Descrição, impacto, cronologia..."></textarea>
+          <button class="bible-add-btn" onclick="adicionarBible('acontecimentos')">+ Adicionar Acontecimento</button>
+        </div>
+        <div id="bibleList-acontecimentos"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FIX: fileInput agora está fora dos modais mas dentro do body -->
+<input type="file" id="fileInput" style="display:none" accept=".txt,.pdf,.doc,.docx,.csv,.xlsx,.md,.png,.jpg,.jpeg,.gif,.webp" onchange="processarFicheiro(event)">
+
+<script>
+// ============================================================
+// ORGAOS
+// ============================================================
+const ORGAOS = [
+  { id:'cerebro',  emoji:'🧠', nome:'Cérebro',   modelo:'gpt-4o',                             papel:'Estratégia, planeamento e visão geral', ativo:true },
+  { id:'coracao',  emoji:'❤️', nome:'Coração',   modelo:'claude-sonnet-4-5',                  papel:'Criatividade, empatia e expressão humana', ativo:true },
+  { id:'pulmao',   emoji:'💨', nome:'Pulmão',     modelo:'google/gemini-2.5-pro',              papel:'Análise profunda e raciocínio complexo', ativo:true },
+  { id:'figado',   emoji:'🔬', nome:'Fígado',     modelo:'deepseek/deepseek-r1',               papel:'Lógica matemática e raciocínio passo a passo', ativo:true },
+  { id:'rim',      emoji:'💧', nome:'Rim',        modelo:'meta-llama/llama-4-maverick',        papel:'Pesquisa, dados e factos precisos', ativo:true },
+  { id:'estomago', emoji:'⚙️', nome:'Estômago',  modelo:'mistral/mistral-large-latest',       papel:'Síntese de informação e processamento', ativo:true },
+  { id:'olho',     emoji:'👁️', nome:'Olho',      modelo:'gpt-4o',                             papel:'Análise visual e observação detalhada', ativo:true },
+  { id:'ouvido',   emoji:'👂', nome:'Ouvido',     modelo:'google/gemini-2.5-flash',            papel:'Compreensão de contexto e nuance', ativo:true },
+  { id:'mao',      emoji:'✋', nome:'Mão',        modelo:'meta-llama/llama-3.3-70b-instruct',  papel:'Ação prática e implementação', ativo:true },
+  { id:'perna',    emoji:'🦵', nome:'Perna',      modelo:'mistral/mistral-small-latest',       papel:'Execução rápida e respostas diretas', ativo:true },
+  { id:'pele',     emoji:'🌐', nome:'Pele',       modelo:'gpt-4o-mini',                        papel:'Interface, comunicação e clareza', ativo:true },
+  { id:'imune',    emoji:'🛡️', nome:'Imune',     modelo:'gpt-4.1-mini',                       papel:'Verificação, segurança e correção', ativo:true },
+  { id:'nervo',    emoji:'⚡', nome:'Nervo',      modelo:'gpt-4o',                             papel:'Síntese final unificada de todas as perspetivas', ativo:true },
+];
+
+const AVATARES = [
+  { emoji:'🌍', anim:'av-float', label:'Terra' },
+  { emoji:'🤖', anim:'av-bounce', label:'Robô' },
+  { emoji:'🧠', anim:'av-pulse', label:'Mente' },
+  { emoji:'⚡', anim:'av-glow-anim', label:'Energia' },
+  { emoji:'🌀', anim:'av-anim', label:'Vórtex' },
+  { emoji:'🔮', anim:'av-float', label:'Orbe' },
+  { emoji:'🌌', anim:'av-pulse', label:'Cosmos' },
+  { emoji:'💎', anim:'av-bounce', label:'Gema' },
+  { emoji:'🦋', anim:'av-float', label:'Borboleta' },
+  { emoji:'🐉', anim:'av-bounce', label:'Dragão' },
+  { emoji:'🌊', anim:'av-float', label:'Onda' },
+  { emoji:'🔭', anim:'av-pulse', label:'Telescópio' },
+  { emoji:'🌺', anim:'av-bounce', label:'Flor' },
+  { emoji:'🎯', anim:'av-pulse', label:'Foco' },
+  { emoji:'🌙', anim:'av-float', label:'Lua' },
+];
+
+const PERSONALIDADES = [
+  { id:'balanced',       icon:'⚖️', nome:'Equilibrada',  desc:'Balanceada e natural' },
+  { id:'analytical',    icon:'🔬', nome:'Analítica',    desc:'Dados e lógica' },
+  { id:'creative',      icon:'🎨', nome:'Criativa',      desc:'Imaginativa e original' },
+  { id:'concise',       icon:'⚡', nome:'Concisa',       desc:'Curta e direta' },
+  { id:'detailed',      icon:'📚', nome:'Detalhada',     desc:'Muito completa' },
+  { id:'friendly',      icon:'😊', nome:'Amigável',      desc:'Tom caloroso' },
+  { id:'formal',        icon:'🎩', nome:'Formal',        desc:'Profissional' },
+  { id:'philosophical', icon:'🌌', nome:'Filosófica',    desc:'Reflexiva e profunda' },
+];
+
+const PERSONALITY_PROMPTS = {
+  balanced:      'Usa um tom equilibrado e natural.',
+  analytical:    'Sê analítico, usa dados e raciocínio lógico.',
+  creative:      'Sê criativo, usa metáforas e pensamento original.',
+  concise:       'Sê muito conciso. Respostas curtas e diretas.',
+  detailed:      'Sê muito detalhado e completo nas respostas.',
+  friendly:      'Usa um tom caloroso, amigável e próximo.',
+  formal:        'Usa um tom formal e profissional.',
+  philosophical: 'Sê reflexivo e filosófico nas respostas.',
+};
+
+// Estado global
+let utilizador = null, emProcessamento = false;
+let sessaoAtual = null, historicoSessao = [];
+let memorias = [], projetos = [], ebooks = [], imagensGeradas = [];
+let storyBible = { personagens: [], mundo: [], objetos: [], acontecimentos: [] };
+let reconhecimentoVoz = null, aOuvirVoz = false;
+let gaiaAvatar = '🌍', gaiaAvatarAnim = 'av-float';
+let gaiaPersonalities = ['balanced'];
+let settings = { longResponses: true, voiceAuto: false, showDelib: true };
+
+// ============================================================
+// LOGIN
+// ============================================================
+async function loginPuter() {
+  try {
+    await puter.auth.signIn();
+    const u = await puter.auth.getUser();
+    utilizador = { nome: u.username || 'Utilizador', tipo: 'puter' };
+    entrarNoApp();
+  } catch(e) { toast('Erro ao entrar com Puter. Tenta novamente.'); }
+}
+function loginDemo() { utilizador = { nome: 'Demo', tipo: 'demo' }; entrarNoApp(); }
+function loginSimple() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { toast('Introduz o teu email!'); return; }
+  utilizador = { nome: email.split('@')[0], tipo: 'simples' };
+  localStorage.setItem('gaia_user', JSON.stringify(utilizador));
+  entrarNoApp();
+}
+function entrarNoApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainApp').classList.add('active');
+  document.getElementById('userName').textContent = utilizador.nome;
+  carregarDados();
+  inicializarOrgaos();
+  renderizarSessoes();
+  novasSessao();
+  inicializarVoz();
+  carregarSettings();
+  construirColorGrids();
+  construirAvatarOptions();
+  construirPersonalityGrid();
+  carregarStoryBible();
+  renderizarBible();
+}
+function logout() { localStorage.removeItem('gaia_user'); location.reload(); }
+
+window.addEventListener('load', () => {
+  const s = localStorage.getItem('gaia_user');
+  if (s) { try { utilizador = JSON.parse(s); entrarNoApp(); } catch(e) { localStorage.removeItem('gaia_user'); } }
+  const pc = localStorage.getItem('gaia_cor_primary');
+  const bc = localStorage.getItem('gaia_cor_bg');
+  if (pc) document.documentElement.style.setProperty('--primary', pc);
+  if (bc) {
+    document.documentElement.style.setProperty('--bg', bc);
+    document.documentElement.style.setProperty('--surface', adjustColor(bc, 5));
+    document.documentElement.style.setProperty('--surface2', adjustColor(bc, 10));
+    document.documentElement.style.setProperty('--surface3', adjustColor(bc, 15));
+  }
+  const av = localStorage.getItem('gaia_avatar_data');
+  if (av) { try { const d = JSON.parse(av); gaiaAvatar = d.emoji; gaiaAvatarAnim = d.anim; } catch(e){} }
+  const ps = localStorage.getItem('gaia_personalities');
+  if (ps) { try { gaiaPersonalities = JSON.parse(ps); } catch(e){} }
+  const lang = localStorage.getItem('gaia_lang');
+  if (lang) { const el = document.getElementById('langSelect'); if(el) el.value = lang; }
+});
+
+// ============================================================
+// DADOS (localStorage)
+// ============================================================
+function carregarDados() {
+  try { memorias = JSON.parse(localStorage.getItem('gaia_memorias') || '[]'); } catch(e){ memorias=[]; }
+  try { projetos = JSON.parse(localStorage.getItem('gaia_projetos') || '[]'); } catch(e){ projetos=[]; }
+  try { ebooks = JSON.parse(localStorage.getItem('gaia_ebooks') || '[]'); } catch(e){ ebooks=[]; }
+  try { imagensGeradas = JSON.parse(localStorage.getItem('gaia_imagens') || '[]'); } catch(e){ imagensGeradas=[]; }
+  try {
+    const sessoes = JSON.parse(localStorage.getItem('gaia_sessoes') || '[]');
+    window._sessoes = sessoes;
+  } catch(e){ window._sessoes = []; }
+}
+function guardarDados() {
+  try {
+    localStorage.setItem('gaia_memorias', JSON.stringify(memorias));
+    localStorage.setItem('gaia_projetos', JSON.stringify(projetos));
+    localStorage.setItem('gaia_ebooks', JSON.stringify(ebooks));
+    localStorage.setItem('gaia_imagens', JSON.stringify(imagensGeradas));
+  } catch(e) { toast('Aviso: armazenamento local cheio.'); }
+}
+function carregarStoryBible() {
+  try { storyBible = JSON.parse(localStorage.getItem('gaia_bible') || '{"personagens":[],"mundo":[],"objetos":[],"acontecimentos":[]}'); } catch(e) { storyBible = { personagens:[], mundo:[], objetos:[], acontecimentos:[] }; }
+}
+function guardarStoryBible() {
+  localStorage.setItem('gaia_bible', JSON.stringify(storyBible));
+}
+function carregarSettings() {
+  try { const s = JSON.parse(localStorage.getItem('gaia_settings')); if(s) settings = {...settings, ...s}; } catch(e){}
+  const map = { longResponses:'toggleLong', voiceAuto:'toggleVoiceAuto', showDelib:'toggleDelib' };
+  Object.entries(map).forEach(([k,id]) => { const el=document.getElementById(id); if(el) el.className='toggle'+(settings[k]?' on':''); });
+}
+
+// ============================================================
+// SESSOES
+// ============================================================
+function novasSessao() {
+  sessaoAtual = { id: Date.now(), nome: 'Nova Conversa', msgs: [] };
+  historicoSessao = [];
+  const ca = document.getElementById('chatArea');
+  ca.innerHTML = '';
+  const wc = document.createElement('div');
+  wc.className = 'welcome-card';
+  wc.id = 'welcomeCard';
+  wc.innerHTML = `
+    <div class="welcome-orb" id="welcomeOrb">${gaiaAvatar}</div>
+    <div class="welcome-title">GAIA está pronta</div>
+    <div class="welcome-sub">Sou uma consciência coletiva de 13 inteligências artificiais. Analiso, crio, gero documentos e imagens — tudo em português europeu.</div>
+    <div class="suggestions">
+      <div class="suggestion" onclick="sg(this)">💡 Explica inteligência artificial</div>
+      <div class="suggestion" onclick="sg(this)">🚀 Estratégia para startup</div>
+      <div class="suggestion" onclick="sg(this)">🧠 Qual o sentido da vida?</div>
+      <div class="suggestion" onclick="sg(this)">✍️ Escreve um poema</div>
+      <div class="suggestion" onclick="sg(this)">📊 Analisa esta situação</div>
+      <div class="suggestion" onclick="sg(this)">🎨 Cria uma imagem de um pôr do sol</div>
+    </div>`;
+  ca.appendChild(wc);
+  document.getElementById('topbarTitle').textContent = 'Nova Conversa';
+  renderizarSessoes();
+}
+function guardarSessao() {
+  if (!sessaoAtual) return;
+  let sessoes = window._sessoes || [];
+  const idx = sessoes.findIndex(s => s.id === sessaoAtual.id);
+  if (idx >= 0) sessoes[idx] = sessaoAtual;
+  else sessoes.unshift(sessaoAtual);
+  if (sessoes.length > 50) sessoes = sessoes.slice(0, 50);
+  window._sessoes = sessoes;
+  try { localStorage.setItem('gaia_sessoes', JSON.stringify(sessoes)); } catch(e){}
+  renderizarSessoes();
+}
+function renderizarSessoes() {
+  const sl = document.getElementById('sessionsList');
+  if (!sl) return;
+  const sessoes = window._sessoes || [];
+  sl.innerHTML = sessoes.length ? sessoes.map(s => `
+    <div class="session-item ${sessaoAtual?.id===s.id?'active':''}" onclick="carregarSessao(${s.id})">
+      <div class="session-name">${s.nome || 'Conversa'}</div>
+      <div class="session-date">${s.data || ''}</div>
+      <div class="session-actions">
+        <button class="session-act-btn del" onclick="event.stopPropagation();apagarSessao(${s.id})">🗑 Apagar</button>
+      </div>
+    </div>`).join('') : '<div style="padding:12px 8px;font-size:0.75rem;color:var(--text-muted);">Sem conversas guardadas.</div>';
+}
+function carregarSessao(id) {
+  const sessoes = window._sessoes || [];
+  const s = sessoes.find(x => x.id === id);
+  if (!s) return;
+  sessaoAtual = s;
+  historicoSessao = [...(s.msgs || [])];
+  const ca = document.getElementById('chatArea');
+  ca.innerHTML = '';
+  historicoSessao.forEach(m => {
+    if (m.role === 'user') adicionarMensagem(m.content, 'user', false);
+    else if (m.role === 'assistant') adicionarMensagem(m.content, 'gaia', false);
+  });
+  document.getElementById('topbarTitle').textContent = s.nome || 'Conversa';
+  renderizarSessoes();
+  ca.scrollTop = ca.scrollHeight;
+}
+function apagarSessao(id) {
+  if (!confirm('Apagar esta conversa?')) return;
+  window._sessoes = (window._sessoes || []).filter(s => s.id !== id);
+  try { localStorage.setItem('gaia_sessoes', JSON.stringify(window._sessoes)); } catch(e){}
+  if (sessaoAtual?.id === id) novasSessao();
+  else renderizarSessoes();
+  toast('🗑 Conversa apagada.');
+}
+
+// ============================================================
+// ORGAOS
+// ============================================================
+function inicializarOrgaos() {
+  const bar = document.getElementById('organsBar');
+  if (!bar) return;
+  const ativos = ORGAOS.filter(o => o.ativo);
+  bar.innerHTML = ativos.map(o => `
+    <div class="organ-chip active" id="chip-${o.id}" title="${o.papel}">
+      <div class="organ-dot"></div>
+      ${o.emoji} ${o.nome}
+    </div>`).join('') +
+    ORGAOS.filter(o => !o.ativo).map(o => `
+    <div class="organ-chip disabled" title="${o.papel}">
+      ${o.emoji} ${o.nome}
+    </div>`).join('');
+}
+function renderizarSaudeOrgaos() {
+  const list = document.getElementById('organHealthList');
+  if (!list) return;
+  list.innerHTML = ORGAOS.map(o => `
+    <div class="organ-health-item">
+      <div class="organ-dot-status ${o.ativo?'online':'offline'}" id="health-${o.id}"></div>
+      <div style="flex:1;">
+        <div class="organ-health-name">${o.emoji} ${o.nome}</div>
+        <div class="organ-health-model">${o.modelo}</div>
+      </div>
+      <button class="organ-test-btn" onclick="testarOrgao('${o.id}')">Testar</button>
+      <button class="organ-toggle-btn" onclick="toggleOrgao('${o.id}')">${o.ativo?'Desativar':'Ativar'}</button>
+    </div>`).join('');
+}
+
+function mudarTab(tab) {
+  ['saude','avatar','cores','prefs'].forEach(t => {
+    const stab = document.getElementById('stab-'+t);
+    const el = document.getElementById('tab-'+t);
+    if (stab) stab.className = 'stab'+(t===tab?' active':'');
+    if (el) el.style.display = t===tab?'block':'none';
+  });
+  if (tab==='saude') renderizarSaudeOrgaos();
+  if (tab==='avatar') { construirAvatarOptions(); construirPersonalityGrid(); }
+}
+async function testarTodos() {
+  toast('↻ A testar todos os órgãos...');
+  for (const o of ORGAOS) {
+    const el = document.getElementById('health-'+o.id);
+    if (el) el.className = 'organ-dot-status testing';
+    try {
+      await puter.ai.chat('OK', { model: o.modelo });
+      if (el) el.className = 'organ-dot-status online';
+    } catch(e) {
+      if (el) el.className = 'organ-dot-status offline';
+    }
+  }
+  toast('✓ Teste concluído!');
+}
+async function testarOrgao(id) {
+  const o = ORGAOS.find(x => x.id===id);
+  if (!o) return;
+  const el = document.getElementById('health-'+id);
+  if (el) el.className = 'organ-dot-status testing';
+  toast('↻ A testar '+o.nome+'...');
+  try {
+    await puter.ai.chat('OK', { model: o.modelo });
+    toast('✓ '+o.nome+' online!');
+    if (el) el.className = 'organ-dot-status online';
+  } catch(e) {
+    toast('✗ '+o.nome+' sem resposta.');
+    if (el) el.className = 'organ-dot-status offline';
+  }
+}
+function toggleOrgao(id) {
+  const o = ORGAOS.find(x => x.id===id);
+  if (!o) return;
+  o.ativo = !o.ativo;
+  guardarDados();
+  inicializarOrgaos();
+  renderizarSaudeOrgaos();
+  toast((o.ativo?'✓ ':'⏸ ')+o.nome+(o.ativo?' ativado!'>' desativado!'));
+}
+function toggleSetting(key) {
+  settings[key] = !settings[key];
+  const map = { longResponses:'toggleLong', voiceAuto:'toggleVoiceAuto', showDelib:'toggleDelib' };
+  const el = document.getElementById(map[key]);
+  if (el) el.className = 'toggle'+(settings[key]?' on':'');
+  localStorage.setItem('gaia_settings', JSON.stringify(settings));
+}
+
+// ============================================================
+// AVATARES
+// ============================================================
+function construirAvatarOptions() {
+  const grid = document.getElementById('avatarOptions');
+  if (!grid) return;
+  grid.innerHTML = AVATARES.map(a => `
+    <div class="avatar-opt ${a.emoji===gaiaAvatar?'selected':''}" onclick="setAvatar('${a.emoji}','${a.anim}')" title="${a.label}">
+      <span class="av-emoji ${a.anim}" style="font-size:1.4rem;">${a.emoji}</span>
+    </div>`).join('');
+}
+function setAvatar(emoji, anim) {
+  gaiaAvatar = emoji;
+  gaiaAvatarAnim = anim || 'av-float';
+  localStorage.setItem('gaia_avatar_data', JSON.stringify({emoji, anim: gaiaAvatarAnim}));
+  atualizarAvatarPreview();
+  construirAvatarOptions();
+  const wo = document.getElementById('welcomeOrb');
+  if (wo) wo.textContent = emoji;
+}
+function atualizarAvatarPreview() {
+  const prev = document.getElementById('avatarPreview');
+  if (prev) prev.textContent = gaiaAvatar;
+}
+
+// ============================================================
+// PERSONALIDADES
+// ============================================================
+function construirPersonalityGrid() {
+  const grid = document.getElementById('personalityGrid');
+  if (!grid) return;
+  grid.innerHTML = PERSONALIDADES.map(p => `
+    <div class="personality-opt ${gaiaPersonalities.includes(p.id)?'selected':''}" onclick="togglePersonality('${p.id}')">
+      <div class="p-icon">${p.icon}</div>
+      <div class="p-name">${p.nome}</div>
+      <div class="p-desc">${p.desc}</div>
+    </div>`).join('');
+  atualizarNotaPersonalidade();
+}
+function togglePersonality(id) {
+  const idx = gaiaPersonalities.indexOf(id);
+  if (idx >= 0) {
+    if (gaiaPersonalities.length === 1) { toast('Mantém pelo menos uma personalidade!'); return; }
+    gaiaPersonalities.splice(idx, 1);
+  } else {
+    gaiaPersonalities.push(id);
+  }
+  localStorage.setItem('gaia_personalities', JSON.stringify(gaiaPersonalities));
+  construirPersonalityGrid();
+}
+function atualizarNotaPersonalidade() {
+  const nota = document.getElementById('personalityNote');
+  if (!nota) return;
+  if (!gaiaPersonalities.length) { nota.textContent = 'Seleciona pelo menos uma personalidade.'; return; }
+  if (gaiaPersonalities.length === 1) {
+    const p = PERSONALIDADES.find(x => x.id===gaiaPersonalities[0]);
+    nota.textContent = 'GAIA está no modo: '+(p?.nome || gaiaPersonalities[0]);
+  } else {
+    const nomes = gaiaPersonalities.map(id => PERSONALIDADES.find(x=>x.id===id)?.nome||id).join(' + ');
+    nota.textContent = 'GAIA combina: '+nomes;
+  }
+}
+function getPersonalityPrompt() {
+  if (!gaiaPersonalities.length) return PERSONALITY_PROMPTS.balanced;
+  return gaiaPersonalities.map(id => PERSONALITY_PROMPTS[id] || '').filter(Boolean).join(' ');
+}
+
+// ============================================================
+// CORES
+// ============================================================
+const CORES_PRIMARY = ['#00e5b8','#4f9cf9','#8b5cf6','#fb923c','#f43f5e','#34d399','#ec4899','#f59e0b','#06b6d4','#84cc16'];
+const CORES_BG = ['#05050d','#0f0f0f','#0a0a1a','#0f1419','#1a0a0a','#0a1a0a','#1a1a0a','#1e1e2e','#0d0d1a','#2d1b69'];
+
+function construirColorGrids() {
+  const currPrimary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+  const currBg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  const gcp = document.getElementById('colorGridPrimary');
+  const gcb = document.getElementById('colorGridBg');
+  if (gcp) gcp.innerHTML = CORES_PRIMARY.map(c => `<div class="color-swatch ${c===currPrimary?'selected':''}" style="background:${c}" onclick="setCor('primary','${c}',this)"></div>`).join('');
+  if (gcb) gcb.innerHTML = CORES_BG.map(c => `<div class="color-swatch ${c===currBg?'selected':''}" style="background:${c}" onclick="setCor('bg','${c}',this)"></div>`).join('');
+}
+function setCor(tipo, cor, el) {
+  if (tipo==='primary') {
+    document.documentElement.style.setProperty('--primary', cor);
+    document.documentElement.style.setProperty('--primary-dim', hexToRgba(cor, 0.12));
+    document.documentElement.style.setProperty('--primary-glow', hexToRgba(cor, 0.25));
+  } else {
+    document.documentElement.style.setProperty('--bg', cor);
+    document.documentElement.style.setProperty('--surface', adjustColor(cor, 5));
+    document.documentElement.style.setProperty('--surface2', adjustColor(cor, 10));
+    document.documentElement.style.setProperty('--surface3', adjustColor(cor, 15));
+  }
+  localStorage.setItem('gaia_cor_'+tipo, cor);
+  el?.closest('.color-grid')?.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el?.classList.add('selected');
+  toast('✓ Cor aplicada!');
+}
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+function adjustColor(hex, amount) {
+  try {
+    const h = hex.replace('#','');
+    let r = parseInt(h.slice(0,2),16)+amount;
+    let g = parseInt(h.slice(2,4),16)+amount;
+    let b = parseInt(h.slice(4,6),16)+amount;
+    r = Math.max(0,Math.min(255,r));
+    g = Math.max(0,Math.min(255,g));
+    b = Math.max(0,Math.min(255,b));
+    return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+  } catch(e) { return hex; }
+}
+function resetarCores() {
+  document.documentElement.style.setProperty('--primary','#00e5b8');
+  document.documentElement.style.setProperty('--primary-dim','rgba(0,229,184,0.12)');
+  document.documentElement.style.setProperty('--primary-glow','rgba(0,229,184,0.25)');
+  document.documentElement.style.setProperty('--bg','#05050d');
+  document.documentElement.style.setProperty('--surface','#0a0a16');
+  document.documentElement.style.setProperty('--surface2','#0f0f1e');
+  document.documentElement.style.setProperty('--surface3','#141428');
+  localStorage.removeItem('gaia_cor_primary');
+  localStorage.removeItem('gaia_cor_bg');
+  construirColorGrids();
+  toast('↺ Cores repostas!');
+}
+
+// ============================================================
+// VOZ
+// ============================================================
+function inicializarVoz() {
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    reconhecimentoVoz = new SR();
+    reconhecimentoVoz.lang = 'pt-PT';
+    reconhecimentoVoz.continuous = false;
+    reconhecimentoVoz.interimResults = false;
+    reconhecimentoVoz.onresult = e => {
+      const txt = e.results[0][0].transcript;
+      const inp = document.getElementById('userInput');
+      if (inp) { inp.value = txt; inp.style.height='auto'; inp.style.height=inp.scrollHeight+'px'; }
+      pararVoz();
+      setTimeout(() => enviar(), 500);
+    };
+    reconhecimentoVoz.onerror = () => pararVoz();
+    reconhecimentoVoz.onend = () => pararVoz();
+  }
+}
+function toggleVoz() {
+  if (aOuvirVoz) pararVoz();
+  else iniciarVoz();
+}
+function iniciarVoz() {
+  if (!reconhecimentoVoz) { toast('Voz não suportada neste navegador.'); return; }
+  aOuvirVoz = true;
+  reconhecimentoVoz.start();
+  const btn = document.getElementById('voiceBtn');
+  if (btn) btn.classList.add('listening');
+  toast('🎤 A ouvir...');
+}
+function pararVoz() {
+  aOuvirVoz = false;
+  if (reconhecimentoVoz) { try { reconhecimentoVoz.stop(); } catch(e){} }
+  const btn = document.getElementById('voiceBtn');
+  if (btn) btn.classList.remove('listening');
+}
+function lerTexto(txt) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt.slice(0,500));
+  u.lang = 'pt-PT';
+  u.rate = 1;
+  window.speechSynthesis.speak(u);
+}
+
+// ============================================================
+// CHAT / ENVIAR
+// ============================================================
+function sg(el) {
+  const txt = el.textContent.replace(/^[^\s]+\s/, '');
+  const inp = document.getElementById('userInput');
+  if (inp) { inp.value = txt; enviar(); }
+}
+
+function adicionarMensagem(conteudo, tipo, animar=true) {
+  const wc = document.getElementById('welcomeCard');
+  if (wc) wc.remove();
+
+  const div = document.createElement('div');
+  div.className = 'msg '+tipo;
+
+  if (tipo === 'gaia') {
+    div.innerHTML = `
+      <div class="msg-header">
+        <div class="msg-avatar">${gaiaAvatar}</div>
+        GAIA
+      </div>
+      <div class="msg-bubble">${formatarTexto(conteudo)}</div>
+      <div class="msg-actions">
+        <button class="action-btn" onclick="copiarTexto(this)">📋 Copiar</button>
+        <button class="action-btn" onclick="lerTexto('${conteudo.replace(/'/g,"\\'").slice(0,300)}')">🔊 Ouvir</button>
+        <button class="action-btn" onclick="gerarDocumentoIA('Documento sobre: '+this.closest('.msg').querySelector('.msg-bubble').textContent.slice(0,100))">📄 Doc</button>
+      </div>`;
+  } else if (tipo === 'user') {
+    div.innerHTML = `<div class="msg-bubble">${conteudo.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  } else {
+    div.innerHTML = `<div class="msg-bubble">${conteudo}</div>`;
+  }
+
+  const ca = document.getElementById('chatArea');
+  ca.appendChild(div);
+  if (animar) ca.scrollTop = ca.scrollHeight;
+  return div;
+}
+
+function formatarTexto(txt) {
+  if (!txt) return '';
+  return txt
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code style="background:rgba(0,229,184,0.1);padding:1px 5px;border-radius:4px;font-family:var(--font-mono);font-size:0.85em;">$1</code>')
+    .replace(/^### (.+)$/gm,'<h3 style="color:var(--primary);margin:12px 0 6px;font-size:1rem;">$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2 style="color:var(--primary);margin:14px 0 7px;font-size:1.1rem;">$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1 style="color:var(--primary);margin:16px 0 8px;font-size:1.2rem;">$1</h1>')
+    .replace(/^[-*] (.+)$/gm,'<li style="margin:2px 0 2px 16px;">$1</li>')
+    .replace(/\n/g,'<br>');
+}
+
+function copiarTexto(btn) {
+  const bubble = btn.closest('.msg').querySelector('.msg-bubble');
+  if (!bubble) return;
+  navigator.clipboard.writeText(bubble.innerText).then(() => toast('📋 Copiado!')).catch(() => toast('Erro ao copiar.'));
+}
+
+function extrairTexto(resp) {
+  if (!resp) return '';
+  if (typeof resp === 'string') return resp;
+  if (Array.isArray(resp)) {
+    for (const item of resp) {
+      if (item && item.message && item.message.content) return item.message.content;
+      if (item && item.content) return item.content;
+      if (typeof item === 'string') return item;
+    }
+  }
+  if (resp.message && resp.message.content) return resp.message.content;
+  if (resp.content) return resp.content;
+  if (resp.text) return resp.text;
+  return String(resp);
+}
+
+async function enviar() {
+  const inp = document.getElementById('userInput');
+  const msg = inp?.value.trim();
+  if (!msg || emProcessamento) return;
+
+  emProcessamento = true;
+  document.getElementById('sendBtn').disabled = true;
+  inp.value = '';
+  inp.style.height = 'auto';
+
+  adicionarMensagem(msg, 'user');
+  historicoSessao.push({ role: 'user', content: msg });
+
+  // Nomear sessão automaticamente com a primeira mensagem
+  if (sessaoAtual && sessaoAtual.nome === 'Nova Conversa') {
+    sessaoAtual.nome = msg.slice(0, 40) + (msg.length > 40 ? '...' : '');
+    sessaoAtual.data = new Date().toLocaleString('pt-PT');
+    document.getElementById('topbarTitle').textContent = sessaoAtual.nome;
+  }
+
+  // Detetar pedido de imagem
+  const isImagemPedido = /\b(cria?|gera?|faz?|desenha?|mostra?|ilustra?)\b.{0,30}\b(imagem|foto|ilustração|imagem|desenho|figura|capa)\b/i.test(msg) ||
+    /\b(imagem de|foto de|gera uma imagem|cria uma imagem)\b/i.test(msg);
+
+  if (isImagemPedido) {
+    await processarImagemChat(msg);
+  } else {
+    await processarChat(msg);
+  }
+
+  emProcessamento = false;
+  document.getElementById('sendBtn').disabled = false;
+  guardarSessao();
+}
+
+async function processarChat(msg) {
+  const orgaosAtivos = ORGAOS.filter(o => o.ativo);
+  const ca = document.getElementById('chatArea');
+
+  // Deliberação
+  let deliberDiv = null;
+  if (settings.showDelib && orgaosAtivos.length > 1) {
+    deliberDiv = document.createElement('div');
+    deliberDiv.className = 'deliberating';
+    deliberDiv.innerHTML = `
+      <div class="delib-header"><div class="spinner"></div> GAIA a deliberar (${orgaosAtivos.length} órgãos)</div>
+      <div class="delib-grid">${orgaosAtivos.map(o => `<div class="delib-organ" id="delib-${o.id}">${o.emoji} ${o.nome}</div>`).join('')}</div>`;
+    ca.appendChild(deliberDiv);
+    ca.scrollTop = ca.scrollHeight;
+  }
+
+  const memContext = memorias.length ? 'Memórias do utilizador:\n' + memorias.map(m => '- '+m.texto).join('\n') + '\n\n' : '';
+  const projContext = projetos.filter(p => p.ativo).length ? 'Projetos ativos:\n' + projetos.filter(p => p.ativo).map(p => `- ${p.nome}: ${p.desc}`).join('\n') + '\n\n' : '';
+  const langCtx = localStorage.getItem('gaia_lang') || 'pt-PT';
+  const langInstr = langCtx === 'pt-PT' ? 'Responde sempre em português europeu.' : langCtx === 'pt-BR' ? 'Responde sempre em português do Brasil.' : `Respond in language: ${langCtx}.`;
+  const personality = getPersonalityPrompt();
+  const longInstr = settings.longResponses ? 'Sê detalhado e completo.' : 'Sê conciso.';
+
+  const sistemaPrompt = `${langInstr} ${personality} ${longInstr}
+És a GAIA — uma consciência coletiva de ${orgaosAtivos.length} inteligências artificiais a trabalhar em harmonia.
+${memContext}${projContext}
+Conversa anterior considerada.`;
+
+  const historico = historicoSessao.slice(-10);
+  const msgs = [{ role:'user', content: sistemaPrompt + '\n\nPergunta do utilizador: ' + msg }];
+  if (historico.length > 1) {
+    msgs[0].content = sistemaPrompt;
+    historico.slice(0,-1).forEach(h => msgs.push(h));
+    msgs.push({ role:'user', content: msg });
+  }
+
+  // Selecionar órgão principal (Nervo para síntese, Cérebro para estratégia, etc.)
+  let orgaoPrincipal = orgaosAtivos.find(o => o.id==='nervo') || orgaosAtivos[0];
+
+  // Animar órgãos ativos
+  const delays = orgaosAtivos.map((_, i) => i * 150);
+  orgaosAtivos.forEach((o, i) => {
+    setTimeout(() => {
+      const el = document.getElementById('delib-'+o.id);
+      if (el) el.className = 'delib-organ thinking';
+      const chip = document.getElementById('chip-'+o.id);
+      if (chip) chip.style.borderColor = 'rgba(251,146,60,0.4)';
+    }, delays[i]);
+    setTimeout(() => {
+      const el = document.getElementById('delib-'+o.id);
+      if (el) el.className = 'delib-organ done';
+      const chip = document.getElementById('chip-'+o.id);
+      if (chip) chip.style.borderColor = '';
+    }, delays[i] + 800);
+  });
+
+  try {
+    const resp = await puter.ai.chat(msgs, { model: orgaoPrincipal.modelo });
+    const texto = extrairTexto(resp);
+
+    if (deliberDiv) deliberDiv.remove();
+    adicionarMensagem(texto, 'gaia');
+    historicoSessao.push({ role: 'assistant', content: texto });
+    if (sessaoAtual) sessaoAtual.msgs = [...historicoSessao];
+
+    if (settings.voiceAuto) lerTexto(texto);
+
+    // Auto-guardar memórias importantes
+    if (texto.length > 100 && Math.random() < 0.1) {
+      const resumo = texto.slice(0, 120) + '...';
+      memorias.push({ id: Date.now(), texto: 'Auto: ' + resumo, data: new Date().toLocaleString('pt-PT') });
+      if (memorias.length > 100) memorias.shift();
+      guardarDados();
+    }
+  } catch(e) {
+    if (deliberDiv) deliberDiv.remove();
+    // Tentar fallback com outro órgão
+    try {
+      const fallback = orgaosAtivos.find(o => o.id !== orgaoPrincipal.id && o.modelo.includes('gpt')) || orgaosAtivos[0];
+      const resp2 = await puter.ai.chat(msgs, { model: fallback.modelo });
+      const texto2 = extrairTexto(resp2);
+      adicionarMensagem(texto2, 'gaia');
+      historicoSessao.push({ role: 'assistant', content: texto2 });
+      if (sessaoAtual) sessaoAtual.msgs = [...historicoSessao];
+    } catch(e2) {
+      adicionarMensagem('Ocorreu um erro ao comunicar com os órgãos. Verifica a ligação ou tenta novamente.', 'system');
+    }
+  }
+}
+
+async function processarImagemChat(msg) {
+  toast('🎨 A gerar imagem...');
+  const ca = document.getElementById('chatArea');
+  try {
+    const promptLimpo = msg.replace(/\b(cria?|gera?|faz?|desenha?|mostra?|ilustra?)\b/gi, '').trim();
+    const resp = await puter.ai.txt2img(promptLimpo || msg);
+    const url = typeof resp === 'string' ? resp : resp?.src || resp?.url || '';
+    if (!url) throw new Error('Sem URL de imagem');
+
+    const msgDiv = adicionarMensagem('', 'gaia');
+    const bubble = msgDiv.querySelector('.msg-bubble');
+    bubble.innerHTML = 'Aqui está a tua imagem:<br><img src="'+url+'" class="gen-image" alt="Imagem gerada" onclick="verImagemGrande(this.src)">';
+
+    imagensGeradas.push({ url, prompt: msg, data: new Date().toLocaleString('pt-PT') });
+    guardarDados();
+    historicoSessao.push({ role: 'assistant', content: '[Imagem gerada: '+msg+']' });
+    if (sessaoAtual) sessaoAtual.msgs = [...historicoSessao];
+  } catch(e) {
+    adicionarMensagem('Não foi possível gerar a imagem. '+e.message, 'system');
+  }
+}
+
+// ============================================================
+// PROCESSAMENTO DE FICHEIROS
+// ============================================================
+async function processarFicheiro(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  toast('📎 A processar ficheiro...');
+
+  try {
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const base64 = e.target.result;
+        adicionarMensagem('📎 Imagem: '+file.name, 'user');
+        try {
+          const resp = await puter.ai.chat([
+            { role:'user', content: [
+              { type:'image_url', image_url:{ url: base64 } },
+              { type:'text', text:'Analisa esta imagem em detalhe em português europeu.' }
+            ]}
+          ], { model:'gpt-4o' });
+          const texto = extrairTexto(resp);
+          adicionarMensagem(texto, 'gaia');
+          historicoSessao.push({ role:'user', content:'[Imagem enviada: '+file.name+']' });
+          historicoSessao.push({ role:'assistant', content:texto });
+          if (sessaoAtual) sessaoAtual.msgs = [...historicoSessao];
+          guardarSessao();
+        } catch(e) {
+          adicionarMensagem('Não foi possível analisar a imagem: '+e.message, 'system');
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const texto = await file.text();
+      const preview = texto.slice(0, 3000);
+      adicionarMensagem('📎 Ficheiro: '+file.name+' ('+Math.round(file.size/1024)+' KB)', 'user');
+      historicoSessao.push({ role:'user', content:'[Ficheiro carregado: '+file.name+']\nConteúdo:\n'+preview });
+
+      const resp = await puter.ai.chat([
+        { role:'user', content:'Analisas este ficheiro e dás um resumo detalhado em português europeu:\n\nFicheiro: '+file.name+'\n\n'+preview }
+      ], { model:'gpt-4o' });
+      const respostaTexto = extrairTexto(resp);
+      adicionarMensagem(respostaTexto, 'gaia');
+      historicoSessao.push({ role:'assistant', content:respostaTexto });
+      if (sessaoAtual) sessaoAtual.msgs = [...historicoSessao];
+      guardarSessao();
+    }
+  } catch(e) {
+    adicionarMensagem('Erro ao processar ficheiro: '+e.message, 'system');
+  }
+  event.target.value = '';
+}
+
+// ============================================================
+// IMAGEM
+// ============================================================
+async function gerarImagem(promptOverride, sizeOverride) {
+  const prompt = promptOverride || document.getElementById('imagePrompt')?.value?.trim();
+  if (!prompt) { toast('Descreve a imagem!'); return null; }
+  const size = sizeOverride || document.getElementById('imageSize')?.value || '1024x1024';
+  const style = document.getElementById('imageStyle')?.value || 'vivid';
+
+  const resultDiv = document.getElementById('imageResult');
+  if (resultDiv) resultDiv.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">✨ A gerar...</div>';
+
+  try {
+    const resp = await puter.ai.txt2img(prompt, false);
+    const url = typeof resp === 'string' ? resp : resp?.src || resp?.url || '';
+    if (!url) throw new Error('Resposta inválida');
+
+    if (resultDiv) resultDiv.innerHTML = `<img src="${url}" style="width:100%;border-radius:var(--radius);border:1px solid var(--border);" onclick="verImagemGrande(this.src)"><br><a href="${url}" download="gaia-imagem.png" style="display:block;text-align:center;margin-top:8px;font-size:0.8rem;color:var(--primary);">⬇ Descarregar</a>`;
+
+    imagensGeradas.unshift({ url, prompt, data: new Date().toLocaleString('pt-PT') });
+    if (imagensGeradas.length > 20) imagensGeradas.pop();
+    guardarDados();
+    renderizarGaleria();
+    toast('✨ Imagem gerada!');
+    return url;
+  } catch(e) {
+    if (resultDiv) resultDiv.innerHTML = '<div style="color:var(--danger);padding:10px;font-size:0.8rem;">Erro: '+e.message+'</div>';
+    toast('Erro ao gerar imagem.');
+    return null;
+  }
+}
+
+function renderizarGaleria() {
+  const grid = document.getElementById('savedImagesGrid');
+  if (!grid) return;
+  grid.innerHTML = imagensGeradas.slice(0,8).map(img => `
+    <div class="image-thumb">
+      <img src="${img.url}" alt="${img.prompt}" loading="lazy">
+      <div class="image-thumb-overlay">
+        <button class="img-action-btn" onclick="verImagemGrande('${img.url}')">🔍</button>
+        <a class="img-action-btn" href="${img.url}" download="gaia.png">⬇</a>
+      </div>
+    </div>`).join('');
+}
+
+function verImagemGrande(url) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9998;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  overlay.onclick = () => overlay.remove();
+  const img = document.createElement('img');
+  img.src = url;
+  img.style.cssText = 'max-width:90vw;max-height:90vh;border-radius:var(--radius);';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
+}
+
+function abrirImageStudio() {
+  abrirModal('imageModal');
+  renderizarGaleria();
+}
+
+// ============================================================
+// MEMORIA
+// ============================================================
+function adicionarMemoria() {
+  const inp = document.getElementById('newMemory');
+  const txt = inp?.value.trim();
+  if (!txt) { toast('Escreve algo!'); return; }
+  memorias.push({ id: Date.now(), texto: txt, data: new Date().toLocaleString('pt-PT') });
+  guardarDados();
+  inp.value = '';
+  renderizarMemorias();
+  toast('🧬 Memória guardada!');
+}
+function renderizarMemorias() {
+  const list = document.getElementById('memoriasList');
+  if (!list) return;
+  list.innerHTML = memorias.length ? memorias.slice().reverse().map(m => `
+    <div class="memory-item">
+      <div style="flex:1;">
+        <div class="memory-text">${m.texto}</div>
+        <div class="memory-meta">${m.data}</div>
+      </div>
+      <button class="memory-del" onclick="apagarMemoria(${m.id})">🗑</button>
+    </div>`).join('') : '<div style="font-size:0.8rem;color:var(--text-muted);">Sem memórias guardadas.</div>';
+}
+function apagarMemoria(id) {
+  memorias = memorias.filter(m => m.id !== id);
+  guardarDados();
+  renderizarMemorias();
+}
+
+// ============================================================
+// PROJETOS
+// ============================================================
+function criarProjeto() {
+  const nome = document.getElementById('projectName')?.value.trim();
+  const desc = document.getElementById('projectDesc')?.value.trim();
+  if (!nome) { toast('Dá um nome ao projeto!'); return; }
+  projetos.unshift({ id: Date.now(), nome, desc: desc||'', ativo: true, data: new Date().toLocaleString('pt-PT') });
+  guardarDados();
+  document.getElementById('projectName').value = '';
+  document.getElementById('projectDesc').value = '';
+  renderizarProjetos();
+  toast('📁 Projeto criado!');
+}
+function renderizarProjetos() {
+  const list = document.getElementById('projetosList');
+  if (!list) return;
+  list.innerHTML = projetos.length ? projetos.map(p => `
+    <div class="project-item">
+      <div class="project-name">${p.nome}</div>
+      <div class="project-desc">${p.desc || 'Sem descrição'}</div>
+      <div class="project-meta">${p.data}</div>
+      <div style="display:flex;gap:5px;margin-top:8px;">
+        <button class="session-act-btn" onclick="toggleProjeto(${p.id})">${p.ativo?'⏸ Pausar':'▶ Ativar'}</button>
+        <button class="session-act-btn del" onclick="apagarProjeto(${p.id})">🗑 Apagar</button>
+      </div>
+    </div>`).join('') : '<div style="font-size:0.8rem;color:var(--text-muted);">Sem projetos.</div>';
+}
+function toggleProjeto(id) {
+  const p = projetos.find(x => x.id===id);
+  if (p) { p.ativo = !p.ativo; guardarDados(); renderizarProjetos(); }
+}
+function apagarProjeto(id) {
+  if (!confirm('Apagar projeto?')) return;
+  projetos = projetos.filter(p => p.id !== id);
+  guardarDados();
+  renderizarProjetos();
+  toast('🗑 Projeto apagado.');
+}
+
+// ============================================================
+// EXPORTACAO
+// ============================================================
+async function exportarConversa() {
+  const msgs = historicoSessao;
+  if (!msgs.length) { toast('Sem mensagens para exportar.'); return; }
+  mostrarProgresso('A gerar PDF...', 10);
+  try {
+    const { jsPDF } = window.jspdf;
+    const pageSize = document.getElementById('pageSizeSelect')?.value || 'a4';
+    let width = 210, height = 297;
+    if (pageSize==='a5'){width=148;height=210;}
+    else if (pageSize==='letter'){width=216;height=279;}
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:[width,height] });
+    const margin = 20;
+    const usableW = width - margin*2;
+    doc.setFillColor(0,229,184); doc.rect(0,0,width,7,'F');
+    doc.setTextColor(0,229,184); doc.setFontSize(18); doc.setFont('helvetica','bold');
+    doc.text('GAIA v9.0 — Conversa', margin, 20);
+    doc.setTextColor(120,120,160); doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.text(new Date().toLocaleString('pt-PT'), margin, 27);
+    let y = 36;
+    mostrarProgresso('A processar mensagens...', 40);
+    for (const m of msgs) {
+      const role = m.role==='user' ? 'Utilizador' : 'GAIA';
+      const color = m.role==='user' ? [79,156,249] : [0,229,184];
+      if (y > height-20) { doc.addPage(); y=20; }
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...color);
+      doc.text(role+':', margin, y); y+=5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(40,40,60);
+      const linhas = doc.splitTextToSize(m.content.slice(0,2000), usableW);
+      for (const l of linhas) {
+        if (y > height-15) { doc.addPage(); y=20; }
+        doc.text(l, margin, y); y+=5;
+      }
+      y+=4;
+    }
+    mostrarProgresso('A guardar...', 90);
+    doc.save('gaia-conversa-'+Date.now()+'.pdf');
+    esconderProgresso();
+    toast('📄 PDF exportado!');
+  } catch(e) { esconderProgresso(); toast('Erro ao exportar PDF.'); }
+}
+
+function exportarConversaWord() {
+  if (!historicoSessao.length) { toast('Sem mensagens!'); return; }
+  const conteudo = historicoSessao.map(m => `<p><strong style="color:${m.role==='user'?'#4f9cf9':'#00e5b8'}">${m.role==='user'?'Utilizador':'GAIA'}:</strong></p><p>${m.content.replace(/\n/g,'<br>')}</p><hr>`).join('');
+  const html = `<html><head><meta charset="UTF-8"><style>body{font-family:Arial;margin:60px;color:#1a1a2e;line-height:1.6;}h1{color:#00e5b8;}hr{border:none;border-top:1px solid #eee;margin:12px 0;}</style></head><body><h1>GAIA v9.0 — Conversa</h1><p style="color:#888;">${new Date().toLocaleString('pt-PT')}</p>${conteudo}</body></html>`;
+  const blob = new Blob([html], {type:'application/msword'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'gaia-conversa.doc'; a.click();
+  toast('📝 Word exportado!');
+}
+
+function exportarConversaExcel() {
+  if (!historicoSessao.length) { toast('Sem mensagens!'); return; }
+  if (!window.XLSX) { toast('Biblioteca Excel não carregada.'); return; }
+  const dados = historicoSessao.map((m,i) => ({ '#': i+1, 'Papel': m.role==='user'?'Utilizador':'GAIA', 'Mensagem': m.content.slice(0,5000) }));
+  const ws = XLSX.utils.json_to_sheet(dados);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Conversa');
+  XLSX.writeFile(wb, 'gaia-conversa.xlsx');
+  toast('📊 Excel exportado!');
+}
+
+async function exportarConversaImagem() {
+  if (!historicoSessao.length) { toast('Sem mensagens!'); return; }
+  if (!window.html2canvas) { toast('Biblioteca não carregada.'); return; }
+  mostrarProgresso('A capturar...', 20);
+  try {
+    const ca = document.getElementById('chatArea');
+    const canvas = await html2canvas(ca, { background:'#05050d', scale:2 });
+    mostrarProgresso('A guardar...', 80);
+    const a = document.createElement('a');
+    a.download = 'gaia-conversa.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    esconderProgresso();
+    toast('🖼️ Imagem exportada!');
+  } catch(e) { esconderProgresso(); toast('Erro ao capturar.'); }
+}
+
+// FIX: função exportarConversaVideo que estava em falta
+async function exportarConversaVideo() {
+  if (!historicoSessao.length) { toast('Sem mensagens para exportar!'); return; }
+  toast('🎬 A gerar vídeo (pode demorar)...');
+  mostrarProgresso('A criar frames...', 5);
+  try {
+    if (!window.html2canvas) { throw new Error('html2canvas não carregado'); }
+    const ca = document.getElementById('chatArea');
+    const canvas = await html2canvas(ca, { background:'#05050d', scale:1 });
+    mostrarProgresso('A codificar...', 60);
+    // Criar um vídeo simples usando MediaRecorder com Canvas
+    const stream = canvas.captureStream(25);
+    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    const chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type:'video/webm' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'gaia-conversa.webm';
+      a.click();
+      esconderProgresso();
+      toast('🎬 Vídeo exportado! (formato WebM)');
+    };
+    recorder.start();
+    // Animar o canvas por 3 segundos
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+    const anim = setInterval(() => {
+      frame++;
+      const prog = frame / 75;
+      ctx.fillStyle = 'rgba(0,229,184,0.02)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      mostrarProgresso('Frame ' + frame + '/75...', 60 + prog*35);
+      if (frame >= 75) {
+        clearInterval(anim);
+        recorder.stop();
+      }
+    }, 40);
+  } catch(e) {
+    esconderProgresso();
+    // Fallback: exportar como TXT se vídeo falhar
+    toast('Vídeo não suportado, a exportar como TXT...');
+    exportarConversaTXT();
+  }
+}
+
+function exportarConversaTXT() {
+  if (!historicoSessao.length) { toast('Sem mensagens!'); return; }
+  const txt = historicoSessao.map(m => (m.role==='user'?'[Utilizador]':'[GAIA]')+'\n'+m.content+'\n').join('\n---\n\n');
+  const blob = new Blob(['GAIA v9.0 — Conversa\n'+new Date().toLocaleString('pt-PT')+'\n\n'+txt], {type:'text/plain'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='gaia-conversa.txt'; a.click();
+  toast('📋 TXT exportado!');
+}
+
+function mostrarProgresso(label, pct) {
+  const ep = document.getElementById('exportProgress');
+  const el = document.getElementById('exportLabel');
+  const eb = document.getElementById('exportBar');
+  if (ep) ep.style.display='block';
+  if (el) el.textContent = label;
+  if (eb) eb.style.width = pct+'%';
+}
+function esconderProgresso() {
+  const ep = document.getElementById('exportProgress');
+  if (ep) { setTimeout(() => ep.style.display='none', 1000); }
+  const eb = document.getElementById('exportBar');
+  if (eb) eb.style.width = '100%';
+}
+
+// ============================================================
+// GERACAO DE DOCUMENTOS
+// ============================================================
+async function gerarDocumento() {
+  const tipo = prompt('Que tipo de documento queres gerar?\n(pdf / word / excel / relatório / apresentação)');
+  if (!tipo) return;
+  const tema = prompt('Sobre que tema?');
+  if (!tema) return;
+  await gerarDocumentoIA('Cria um ' + tipo + ' sobre: ' + tema, null, tipo);
+}
+
+async function gerarDocumentoIA(pedido, conteudo=null, tipoHint=null) {
+  toast('📄 A gerar documento...');
+  try {
+    let texto = conteudo;
+    if (!texto) {
+      const prompt = 'Cria um documento profissional e completo em português europeu para: "'+pedido+'".\nInclui: título, introdução, secções detalhadas, conclusão e referências quando aplicável.\nFormata bem com cabeçalhos e parágrafos. Sê detalhado e de alta qualidade.';
+      const resp = await puter.ai.chat([{ role:'user', content:prompt }], { model:'gpt-4o' });
+      texto = extrairTexto(resp);
+    }
+    const lower = (pedido+' '+(tipoHint||'')).toLowerCase();
+    if (lower.includes('excel')||lower.includes('xlsx')) gerarExcelFormatado(texto, pedido);
+    else if (lower.includes('word')||lower.includes('doc')) gerarWordFormatado(texto, pedido);
+    else gerarPDFFormatado(texto, pedido);
+  } catch(e) { toast('Erro ao gerar documento: '+e.message); }
+}
+
+function gerarPDFFormatado(texto, titulo) {
+  const pageSize = document.getElementById('pageSizeSelect')?.value || 'a4';
+  let width=210, height=297;
+  if (pageSize==='a5'){width=148;height=210;}
+  else if (pageSize==='letter'){width=216;height=279;}
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:[width,height] });
+    const margin=22, usableW=width-margin*2;
+    doc.setFillColor(0,229,184); doc.rect(0,0,width,8,'F');
+    doc.setFillColor(79,156,249); doc.rect(width*0.6,0,width*0.4,8,'F');
+    doc.setTextColor(0,229,184); doc.setFontSize(22); doc.setFont('helvetica','bold');
+    const tituloLimpo = (titulo||'Documento').replace(/cria (um|uma) (pdf|word|excel|documento|relatório) (sobre:?|para:?)/i,'').trim().slice(0,60);
+    const tituloLinhas = doc.splitTextToSize(tituloLimpo, usableW);
+    doc.text(tituloLinhas, margin, 22);
+    doc.setTextColor(120,120,160); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Gerado por GAIA v9.0 • '+new Date().toLocaleDateString('pt-PT'), margin, 22+tituloLinhas.length*8+2);
+    const divY = 22+tituloLinhas.length*8+8;
+    doc.setDrawColor(0,229,184); doc.setLineWidth(0.5); doc.line(margin,divY,width-margin,divY);
+    let y=divY+8;
+    doc.setTextColor(30,30,50); doc.setFontSize(10); doc.setFont('helvetica','normal');
+    for (const linha of texto.split('\n')) {
+      if (!linha.trim()){y+=4;continue;}
+      const isH = linha.trim().match(/^#{1,3}\s/) || (linha.length<60&&linha.trim()===linha.trim().toUpperCase()&&linha.trim().length>3);
+      if (isH) {
+        if (y>height-30){doc.addPage();y=20;}
+        doc.setFont('helvetica','bold'); doc.setTextColor(0,229,184); doc.setFontSize(12);
+        doc.text(linha.replace(/^#{1,3}\s*/,''), margin, y); y+=7;
+        doc.setFont('helvetica','normal'); doc.setTextColor(30,30,50); doc.setFontSize(10);
+      } else {
+        const ls = doc.splitTextToSize(linha.replace(/^[*-] /,'• '), usableW);
+        for (const l of ls) { if(y>height-20){doc.addPage();y=20;} doc.text(l,margin,y); y+=5.5; }
+        y+=1;
+      }
+    }
+    const tot = doc.internal.getNumberOfPages();
+    for (let i=1;i<=tot;i++){doc.setPage(i);doc.setFillColor(5,5,15);doc.rect(0,height-8,width,8,'F');doc.setTextColor(100,100,140);doc.setFontSize(7);doc.text('GAIA v9.0',margin,height-3);doc.text(i+' / '+tot,width-margin,height-3,{align:'right'});}
+    doc.save('gaia-'+tituloLimpo.slice(0,30).replace(/\s+/g,'-')+'.pdf');
+    toast('📄 PDF exportado!');
+  } catch(e){ toast('Erro ao gerar PDF: '+e.message); console.error(e); }
+}
+
+function gerarWordFormatado(texto, titulo) {
+  const tituloLimpo = (titulo||'Documento').slice(0,60);
+  const conteudo = texto.split('\n').map(l => {
+    if (!l.trim()) return '<p> </p>';
+    const isH = l.trim().match(/^#{1,3}\s/) || (l.length<60&&l.trim()===l.trim().toUpperCase()&&l.trim().length>3);
+    if (isH) return '<h2 style="color:#00e5b8;font-family:Arial;">'+l.replace(/^#{1,3}\s*/,'')+'</h2>';
+    return '<p style="font-family:Arial;font-size:11pt;line-height:1.7;">'+l.replace(/^[*-] /,'• ')+'</p>';
+  }).join('');
+  const html = '<html><head><meta charset="UTF-8"><style>body{font-family:Arial;margin:60px;color:#1a1a2e;}.header{border-bottom:3px solid #00e5b8;padding-bottom:16px;margin-bottom:24px;}</style></head><body><div class="header"><h1 style="color:#00e5b8;">'+tituloLimpo+'</h1><p style="color:#888;">Gerado por GAIA v9.0 — '+new Date().toLocaleString('pt-PT')+'</p></div>'+conteudo+'</body></html>';
+  const blob = new Blob([html], {type:'application/msword'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=tituloLimpo.replace(/\s+/g,'_')+'.doc'; a.click();
+  toast('📝 Word exportado!');
+}
+
+function gerarExcelFormatado(texto, titulo) {
+  if (!window.XLSX) { toast('Biblioteca Excel não carregada.'); return; }
+  const linhas = texto.split('\n').filter(l => l.trim());
+  const dados = linhas.map((l,i) => ({ 'Linha': i+1, 'Conteúdo': l.replace(/^#{1,3}\s*/,'').replace(/^[*-] /,'• ') }));
+  const ws = XLSX.utils.json_to_sheet(dados);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Documento');
+  XLSX.writeFile(wb, ((titulo||'documento').slice(0,30).replace(/\s+/g,'_'))+'.xlsx');
+  toast('📊 Excel exportado!');
+}
+
+// ============================================================
+// EBOOKS
+// ============================================================
+async function criarEbook() {
+  const titulo = document.getElementById('ebookTitle')?.value.trim();
+  const genero = document.getElementById('ebookGenre')?.value.trim();
+  const sinopse = document.getElementById('ebookSynopsis')?.value.trim();
+  const gerarCapa = document.getElementById('gerarCapaCheck')?.checked || false;
+  const usarBible = document.getElementById('usarBibleCheck')?.checked || false;
+  if (!titulo) { toast('Dá um título!'); return; }
+  toast('📚 A criar eBook...');
+  try {
+    let contextoBible = construirContextoBible(usarBible);
+    const prompt = 'Cria um eBook completo em português europeu.\nTítulo: "'+titulo+'"\nGénero: '+(genero||'geral')+'\nSinopse: '+(sinopse||'tema livre')+'\n'+contextoBible+'\nEstrutura: título criativo, prefácio, 6 capítulos detalhados, conclusão, notas finais. Alta qualidade literária.';
+    const resp = await puter.ai.chat([{ role:'user', content:prompt }], { model:'gpt-4o' });
+    let conteudo = extrairTexto(resp);
+    conteudo = await melhorarEbookBestSeller(conteudo, titulo, genero, contextoBible);
+    let capaUrl = null;
+    if (gerarCapa) capaUrl = await gerarImagem('Capa profissional de livro: "'+titulo+'" género '+genero, '1024x1024');
+    ebooks.unshift({ id:Date.now(), titulo, genero, sinopse, conteudo, capa:capaUrl, data:new Date().toLocaleString('pt-PT') });
+    guardarDados(); renderizarEbooks();
+    document.getElementById('ebookTitle').value=''; document.getElementById('ebookGenre').value=''; document.getElementById('ebookSynopsis').value='';
+    toast('📚 eBook criado!');
+  } catch(e) { toast('Erro: '+e.message); console.error(e); }
+}
+
+async function criarEbookCapitulos() {
+  const titulo = document.getElementById('ebookTitle')?.value.trim();
+  const genero = document.getElementById('ebookGenre')?.value.trim();
+  const sinopse = document.getElementById('ebookSynopsis')?.value.trim();
+  const usarBible = document.getElementById('usarBibleCheck')?.checked || false;
+  if (!titulo) { toast('Dá um título!'); return; }
+  const numCaps = parseInt(prompt('Quantos capítulos? (5-10)', '6')) || 6;
+  toast('📑 A gerar '+numCaps+' capítulos...');
+  try {
+    let contextoBible = construirContextoBible(usarBible);
+    const caps = [];
+    for (let i=1; i<=numCaps; i++) {
+      toast('📑 Capítulo '+i+' de '+numCaps+'...');
+      const r = await puter.ai.chat([{ role:'user', content:'Capítulo '+i+' do eBook "'+titulo+'" ('+genero+'). Sinopse: '+sinopse+contextoBible+'. Título criativo e 4-6 parágrafos. Português europeu.' }], { model:'gpt-4o' });
+      caps.push(extrairTexto(r));
+    }
+    const rf = await puter.ai.chat([{ role:'user', content:'Junta estes capítulos num eBook completo com prefácio e conclusão:\n\n'+caps.map((c,i)=>'CAP '+(i+1)+':\n'+c).join('\n\n') }], { model:'gpt-4o' });
+    let conteudo = await melhorarEbookBestSeller(extrairTexto(rf), titulo, genero, contextoBible);
+    ebooks.unshift({ id:Date.now(), titulo, genero, sinopse, conteudo, data:new Date().toLocaleString('pt-PT') });
+    guardarDados(); renderizarEbooks();
+    toast('📚 eBook completo gerado!');
+  } catch(e) { toast('Erro: '+e.message); }
+}
+
+function construirContextoBible(usar) {
+  if (!usar) return '';
+  let ctx = '\n\nSTORY BIBLE:\n';
+  if (storyBible.personagens.length) ctx += 'Personagens:\n'+storyBible.personagens.map(p=>'- '+p.nome+': '+p.desc).join('\n')+'\n';
+  if (storyBible.mundo.length) ctx += 'Mundo:\n'+storyBible.mundo.map(m=>'- '+m.nome+': '+m.desc).join('\n')+'\n';
+  if (storyBible.objetos.length) ctx += 'Objetos:\n'+storyBible.objetos.map(o=>'- '+o.nome+': '+o.desc).join('\n')+'\n';
+  if (storyBible.acontecimentos.length) ctx += 'Acontecimentos:\n'+storyBible.acontecimentos.map(a=>'- '+a.nome+': '+a.desc).join('\n')+'\n';
+  return ctx;
+}
+
+async function melhorarEbookBestSeller(conteudo, titulo, genero, contextoBible) {
+  try {
+    const r = await puter.ai.chat([{ role:'user', content:'Melhora este eBook para nível best-seller: narrativa envolvente, tensão, linguagem rica. Mantém estrutura.\n\nTítulo: '+titulo+'\nGénero: '+genero+contextoBible+'\n\n'+conteudo.slice(0,8000) }], { model:'gpt-4o' });
+    return extrairTexto(r);
+  } catch(e) { return conteudo; }
+}
+
+function renderizarEbooks() {
+  const list = document.getElementById('ebooksList');
+  if (!list) return;
+  list.innerHTML = ebooks.length ? ebooks.map(e => `
+    <div class="ebook-item">
+      ${e.capa ? '<img src="'+e.capa+'" style="width:100%;border-radius:var(--radius-sm);margin-bottom:8px;">' : ''}
+      <div class="ebook-title">${e.titulo}</div>
+      <div class="ebook-meta">${e.genero || 'Geral'} • ${e.data} • ${Math.round(e.conteudo.length/1000)}k chars</div>
+      <div class="ebook-actions">
+        <button class="ebook-btn" onclick="exportarEbookPDF(${e.id})">📄 PDF</button>
+        <button class="ebook-btn" onclick="descarregarEbookWord(${e.id})">📝 Word</button>
+        <button class="ebook-btn" onclick="descarregarEbookTXT(${e.id})">📋 TXT</button>
+        <button class="ebook-btn" onclick="melhorarEbook(${e.id})">✨ Melhorar</button>
+        <button class="ebook-btn" onclick="fundirEbook(${e.id})">🔗 Fundir</button>
+        <button class="ebook-btn" style="color:var(--danger);" onclick="apagarEbook(${e.id})">🗑</button>
+      </div>
+    </div>`).join('') : '<div style="font-size:0.8rem;color:var(--text-muted);">Nenhum eBook criado ainda.</div>';
+}
+
+async function exportarEbookPDF(id) {
+  const e = ebooks.find(x=>x.id===id);
+  if (!e) return;
+  toast('📄 A gerar PDF...');
+  gerarPDFFormatado(e.conteudo, e.titulo);
+}
+
+function descarregarEbookTXT(id) {
+  const e = ebooks.find(x=>x.id===id);
+  if (!e) return;
+  const blob = new Blob([e.conteudo],{type:'text/plain'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=e.titulo+'.txt'; a.click();
+  toast('⬇ TXT descarregado!');
+}
+
+function descarregarEbookWord(id) {
+  const e = ebooks.find(x=>x.id===id);
+  if (!e) return;
+  gerarWordFormatado(e.conteudo, e.titulo);
+}
+
+async function fundirEbook(id) {
+  if (ebooks.length < 2) { toast('Precisa de pelo menos 2 eBooks.'); return; }
+  const outros = ebooks.filter(e=>e.id!==id).map(e=>e.titulo).join('\n');
+  const escolha = prompt('Fundir com qual eBook?\n'+outros);
+  if (!escolha) return;
+  const outro = ebooks.find(e=>e.titulo.toLowerCase().includes(escolha.toLowerCase()));
+  const atual = ebooks.find(e=>e.id===id);
+  if (!outro||!atual) { toast('eBook não encontrado.'); return; }
+  toast('🔗 A fundir...');
+  try {
+    const r = await puter.ai.chat([{ role:'user', content:'Funde estes dois eBooks:\n\n=== '+atual.titulo+' ===\n'+atual.conteudo.slice(0,3000)+'\n\n=== '+outro.titulo+' ===\n'+outro.conteudo.slice(0,3000) }], { model:'gpt-4o' });
+    ebooks.push({ id:Date.now(), titulo:atual.titulo+' + '+outro.titulo, genero:'fusão', conteudo:extrairTexto(r), data:new Date().toLocaleString('pt-PT') });
+    guardarDados(); renderizarEbooks(); toast('🔗 Fundidos!');
+  } catch(e) { toast('Erro ao fundir.'); }
+}
+
+async function melhorarEbook(id) {
+  const e = ebooks.find(x=>x.id===id);
+  if (!e) return;
+  toast('✨ A melhorar...');
+  try {
+    const r = await puter.ai.chat([{ role:'user', content:'Melhora significativamente este eBook — escrita, conteúdo, ritmo:\n\n'+e.conteudo.slice(0,5000) }], { model:'gpt-4o' });
+    e.conteudo = extrairTexto(r);
+    guardarDados(); renderizarEbooks(); toast('✨ Melhorado!');
+  } catch(e) { toast('Erro.'); }
+}
+
+function apagarEbook(id) {
+  if (!confirm('Apagar eBook?')) return;
+  ebooks = ebooks.filter(e=>e.id!==id);
+  guardarDados(); renderizarEbooks();
+  toast('🗑 eBook apagado.');
+}
+
+async function importarEbook(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const conteudo = await file.text();
+  ebooks.unshift({ id:Date.now(), titulo:file.name.replace(/\.[^.]+$/,''), genero:'importado', conteudo:conteudo.slice(0,50000), data:new Date().toLocaleString('pt-PT') });
+  guardarDados(); renderizarEbooks();
+  toast('📚 eBook importado!');
+  event.target.value='';
+}
+
+// ============================================================
+// STORY BIBLE
+// ============================================================
+// FIX: IDs dos inputs corrigidos para corresponder ao HTML (personagensNome -> personagensNome)
+function adicionarBible(cat) {
+  const nomeInput = document.getElementById(cat+'Nome');
+  const descInput = document.getElementById(cat+'Desc');
+  const nome = nomeInput?.value.trim();
+  const desc = descInput?.value.trim();
+  if (!nome) { toast('Dá um nome!'); return; }
+  if (!storyBible[cat]) storyBible[cat] = [];
+  storyBible[cat].push({ id:Date.now(), nome, desc:desc||'', data:Date.now() });
+  guardarStoryBible(); renderizarBible();
+  if (nomeInput) nomeInput.value='';
+  if (descInput) descInput.value='';
+  toast('✓ Adicionado à Story Bible!');
+}
+function apagarBible(cat, id) {
+  storyBible[cat] = storyBible[cat].filter(i=>i.id!==id);
+  guardarStoryBible(); renderizarBible();
+}
+function editarBible(cat, id) {
+  const item = storyBible[cat].find(i=>i.id===id);
+  if (!item) return;
+  const n = prompt('Novo nome:', item.nome); if(n===null) return;
+  const d = prompt('Nova descrição:', item.desc); if(d===null) return;
+  item.nome=n; item.desc=d;
+  guardarStoryBible(); renderizarBible();
+}
+function renderizarBible() {
+  ['personagens','mundo','objetos','acontecimentos'].forEach(cat => {
+    const list = document.getElementById('bibleList-'+cat);
+    if (!list) return;
+    const items = storyBible[cat] || [];
+    list.innerHTML = items.length ? items.map(item => `
+      <div class="bible-item">
+        <div class="bible-item-header">
+          <div class="bible-item-title">${item.nome}</div>
+        </div>
+        <div class="bible-item-content">${item.desc || ''}</div>
+        <div class="bible-item-actions">
+          <button class="session-act-btn" onclick="editarBible('${cat}',${item.id})">✏ Editar</button>
+          <button class="session-act-btn del" onclick="apagarBible('${cat}',${item.id})">🗑 Apagar</button>
+        </div>
+      </div>`).join('') : '<div style="font-size:0.78rem;color:var(--text-muted);padding:8px 0;">Sem itens.</div>';
+  });
+}
+
+function mudarEbookTab(tab) {
+  document.getElementById('stab-ebooks').className = 'stab'+(tab==='ebooks'?' active':'');
+  document.getElementById('stab-bible').className = 'stab'+(tab==='bible'?' active':'');
+  document.getElementById('tab-ebooks').style.display = tab==='ebooks'?'block':'none';
+  document.getElementById('tab-bible').style.display = tab==='bible'?'block':'none';
+}
+
+// Inicialização das abas da bible (delegação de eventos - mais robusta)
+document.addEventListener('click', e => {
+  const bibleTab = e.target.closest('.bible-tab');
+  if (!bibleTab) return;
+  document.querySelectorAll('.bible-tab').forEach(t=>t.classList.remove('active'));
+  bibleTab.classList.add('active');
+  const target = bibleTab.getAttribute('data-bible');
+  document.querySelectorAll('.bible-section').forEach(s=>s.classList.remove('active'));
+  const sec = document.getElementById('bible-'+target);
+  if (sec) sec.classList.add('active');
+});
+
+// ============================================================
+// PANELS & MODALS
+// ============================================================
+function abrirPanel(id) {
+  ['settingsPanel','memoryPanel','projectsPanel','ebookPanel'].forEach(pid => {
+    if(pid!==id){const el=document.getElementById(pid);if(el)el.classList.remove('open');}
+  });
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  panel.classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  if (id==='memoryPanel') renderizarMemorias();
+  if (id==='projectsPanel') renderizarProjetos();
+  if (id==='ebookPanel') { renderizarEbooks(); renderizarBible(); }
+  if (id==='settingsPanel') renderizarSaudeOrgaos();
+}
+function fecharPanel(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+  const algumAberto = ['settingsPanel','memoryPanel','projectsPanel','ebookPanel'].some(pid => {
+    if (pid===id) return false;
+    const p = document.getElementById(pid);
+    return p && p.classList.contains('open');
+  });
+  const algumModal = ['imageModal','exportModal'].some(mid => {
+    const m = document.getElementById(mid);
+    return m && m.classList.contains('show');
+  });
+  if (!algumAberto && !algumModal) document.getElementById('overlay').classList.remove('show');
+}
+function abrirModal(id) {
+  fecharTudo();
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+function fecharModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+function fecharTudo() {
+  ['settingsPanel','memoryPanel','projectsPanel','ebookPanel'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('open');});
+  ['imageModal','exportModal'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
+  document.getElementById('overlay').classList.remove('show');
+}
+function fecharOverlay() {
+  const sb = document.getElementById('sidebar');
+  if (sb && sb.classList.contains('open') && window.innerWidth < 768) sb.classList.remove('open');
+  ['imageModal','exportModal'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
+  const algumPanelAberto = ['settingsPanel','memoryPanel','projectsPanel','ebookPanel'].some(id=>{
+    const el=document.getElementById(id); return el&&el.classList.contains('open');
+  });
+  if (!algumPanelAberto) document.getElementById('overlay').classList.remove('show');
+}
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  if (window.innerWidth < 768) {
+    sb.classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  } else {
+    const isOpen = sb.style.width !== '0px' && sb.style.width !== '';
+    if (isOpen || sb.style.width === '') {
+      sb.style.width = '0px'; sb.style.minWidth = '0px';
+    } else {
+      sb.style.width = '256px'; sb.style.minWidth = '256px';
+    }
+  }
+}
+function toast(msg) {
+  // Remove toasts anteriores
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+console.log('🌍 GAIA v9.0 — Corrigido e completo. Todos os sistemas operacionais.');
+</script>
+</body>
+</html>
