@@ -1,0 +1,8 @@
+{
+  "name": "gaia-nucleus",
+  "version": "2.0.0",
+  "type": "module",
+  "dependencies": {
+    "@vercel/kv": "^1.0.0"
+  }
+}

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#060e1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/gaia-32.png">
+<link rel="apple-touch-icon" href="/icons/gaia-192.png">
+<title>GAIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--bg:#060e1f;--s2:#0d1e35;--s3:#112440;--ocean:#00c8ff;--forest:#39ff9a;--gold:#ffd700;--magenta:#ff6ac1;--purple:#a78bfa;--orange:#f97316;--text:#e8f4ff;--muted:rgba(232,244,255,0.55);--dim:rgba(232,244,255,0.28);--border:rgba(0,200,255,0.1);--r:14px;--font:'Syne',sans-serif;--body:'DM Sans',sans-serif;}
+html,body{height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:var(--body);color:var(--text);display:flex;flex-direction:column;height:100dvh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(0,100,200,0.08) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 90%,rgba(57,255,154,0.04) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+/* ── LOGO ANIMADO ── */
+.logo{width:36px;height:36px;flex-shrink:0;}
+.a1{animation:rCW 8s linear infinite;transform-origin:50% 50%;}
+.a2{animation:rCCW 12s linear infinite;transform-origin:50% 50%;}
+.a3{animation:rCW 6s linear infinite;transform-origin:50% 50%;}
+.a4{animation:rCCW 9s linear infinite;transform-origin:50% 50%;}
+.a5{animation:rCW 14s linear infinite;transform-origin:50% 50%;}
+@keyframes rCW{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes rCCW{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
+.cg{animation:cgp 2.5s ease-in-out infinite alternate;}
+@keyframes cgp{from{opacity:.6;}to{opacity:1;}}
+
+/* ── HEADER ── */
+.header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:rgba(6,14,31,0.92);backdrop-filter:blur(24px);position:relative;z-index:10;padding-top:max(10px,env(safe-area-inset-top));}
+.hi h1{font-family:var(--font);font-size:1rem;font-weight:800;letter-spacing:.1em;background:linear-gradient(90deg,var(--ocean),var(--forest));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hi p{font-size:.62rem;color:var(--dim);margin-top:1px;}
+.hr{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.sdot{width:7px;height:7px;border-radius:50%;background:#1e3a5f;transition:all .5s;}
+.nbadge{font-size:.6rem;background:rgba(57,255,154,.15);color:var(--forest);border:1px solid rgba(57,255,154,.25);border-radius:20px;padding:2px 8px;font-family:var(--font);font-weight:700;}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(6,14,31,0.7);position:relative;z-index:9;}
+.tab{flex:1;padding:10px 2px;font-size:.63rem;font-family:var(--font);font-weight:600;letter-spacing:.04em;text-align:center;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;transition:all .2s;}
+.tab.active{color:var(--ocean);border-bottom-color:var(--ocean);}
+
+/* ── PANELS ── */
+.panel{flex:1;display:none;flex-direction:column;overflow:hidden;position:relative;z-index:1;}
+.panel.active{display:flex;}
+
+/* ── MODOS ── */
+.modos{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.modos::-webkit-scrollbar{display:none;}
+.mbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.7rem;font-family:var(--body);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.mbtn.active{background:linear-gradient(135deg,rgba(0,200,255,.14),rgba(57,255,154,.09));border-color:var(--ocean);color:var(--ocean);}
+.mbtn.ron{background:rgba(57,255,154,.09);border-color:rgba(57,255,154,.35);color:var(--forest);margin-left:auto;}
+.mbtn.roff{opacity:.4;margin-left:auto;}
+
+/* ── ÓRGÃOS ── */
+.orgaos{display:flex;gap:5px;padding:6px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.orgaos::-webkit-scrollbar{display:none;}
+.ochip{padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:.67rem;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+.ochip.active{background:rgba(0,200,255,.1);border-color:rgba(0,200,255,.4);color:var(--ocean);}
+
+/* ── CHAT ── */
+.chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:13px;-webkit-overflow-scrolling:touch;}
+.chat::-webkit-scrollbar{width:3px;}
+.chat::-webkit-scrollbar-thumb{background:linear-gradient(var(--ocean),var(--forest));border-radius:3px;}
+.msg{max-width:88%;line-height:1.7;font-size:.875rem;font-weight:300;}
+.msg.ivo{align-self:flex-end;background:linear-gradient(135deg,rgba(0,200,255,.11),rgba(57,255,154,.07));border:1px solid rgba(0,200,255,.2);border-radius:16px 16px 4px 16px;padding:10px 14px;}
+.msg.gaia{align-self:flex-start;background:rgba(13,30,53,.88);border:1px solid var(--border);border-radius:4px 16px 16px 16px;padding:11px 15px;position:relative;}
+.msg.gaia::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:2px;background:linear-gradient(var(--ocean),var(--forest));border-radius:2px;}
+.msg.sistema{align-self:flex-start;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:4px 16px 16px 16px;padding:10px 14px;max-width:96%;font-size:.8rem;color:var(--purple);}
+.mm{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(0,200,255,.08);}
+.tg{font-size:.59rem;color:var(--dim);background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.1);padding:1px 7px;border-radius:10px;font-family:var(--font);}
+.tg.p{color:rgba(57,255,154,.9);background:rgba(57,255,154,.08);border-color:rgba(57,255,154,.2);}
+.tg.n{color:rgba(255,215,0,.8);background:rgba(255,215,0,.06);border-color:rgba(255,215,0,.15);}
+.thinking{align-self:flex-start;padding:10px 14px;background:rgba(13,30,53,.88);border:1px solid var(--border);border-radius:4px 16px 16px 16px;display:flex;align-items:center;gap:9px;}
+.tt{font-size:.7rem;color:var(--dim);font-style:italic;}
+.dots{display:flex;gap:4px;}
+.dot{width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,var(--ocean),var(--forest));animation:dp 1.4s ease-in-out infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+@keyframes dp{0%,60%,100%{opacity:.2;transform:scale(.8);}30%{opacity:1;transform:scale(1);}}
+
+/* ── INPUT ── */
+.ia{padding:10px 14px;border-top:1px solid var(--border);background:rgba(6,14,31,.95);flex-shrink:0;padding-bottom:max(10px,env(safe-area-inset-bottom));position:relative;z-index:5;}
+.ia::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--ocean),var(--forest),transparent);opacity:.3;}
+.ir{display:flex;gap:8px;align-items:flex-end;}
+.vb{width:44px;height:44px;border-radius:var(--r);background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.2);color:var(--ocean);font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.vb.active{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);animation:vp 1s ease-in-out infinite;}
+@keyframes vp{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+.inp{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:16px;font-family:var(--body);font-weight:300;resize:none;min-height:44px;max-height:120px;outline:none;transition:border-color .2s;line-height:1.5;}
+.inp:focus{border-color:rgba(0,200,255,.4);}
+.inp::placeholder{color:var(--dim);}
+.bs{width:44px;height:44px;border-radius:var(--r);background:linear-gradient(135deg,#005f8a,var(--ocean),#22c55e);border:none;cursor:pointer;flex-shrink:0;box-shadow:0 4px 16px rgba(0,200,255,.25);display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.bs:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,200,255,.38);}
+.bs:active{transform:scale(.95);}
+.bs:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+.si{width:18px;height:18px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── NÚCLEOS PANEL ── */
+.nc-area{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;}
+
+.nc-intro{background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.12);border-radius:var(--r);padding:12px 14px;font-size:.78rem;color:var(--muted);line-height:1.7;}
+.nc-intro strong{color:var(--ocean);}
+
+.nc-card{background:var(--s2);border-radius:var(--r);overflow:hidden;transition:border-color .2s;}
+.nc-card.activo{border:1px solid rgba(0,200,255,.15);}
+.nc-card.inactivo{border:1px solid rgba(255,255,255,.05);opacity:.6;}
+.nc-card.imutavel{border:1px solid rgba(0,200,255,.3);}
+
+.nc-header{padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.nc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:all .3s;}
+.nc-dot.on{box-shadow:0 0 8px currentColor;}
+.nc-id{font-family:var(--font);font-size:.65rem;font-weight:700;color:var(--dim);min-width:18px;}
+.nc-nome{font-family:var(--font);font-size:.82rem;font-weight:700;flex:1;}
+.nc-versao{font-size:.6rem;color:var(--dim);font-family:monospace;}
+.nc-badge{font-size:.58rem;padding:2px 7px;border-radius:10px;font-family:var(--font);font-weight:700;}
+.nc-badge.imut{background:rgba(0,200,255,.1);color:var(--ocean);border:1px solid rgba(0,200,255,.2);}
+.nc-badge.ok{background:rgba(57,255,154,.1);color:var(--forest);border:1px solid rgba(57,255,154,.2);}
+.nc-badge.off{background:rgba(255,255,255,.05);color:var(--dim);}
+
+.nc-body{padding:0 14px 12px;border-top:1px solid rgba(255,255,255,.05);}
+.nc-desc{font-size:.74rem;color:var(--muted);margin:8px 0 10px;line-height:1.6;}
+.nc-prompt{background:var(--s3);border-radius:8px;padding:10px 12px;font-size:.7rem;color:var(--dim);line-height:1.65;max-height:100px;overflow-y:auto;font-family:monospace;white-space:pre-wrap;margin-bottom:10px;}
+.nc-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.nc-btn{padding:5px 12px;border-radius:20px;font-size:.67rem;font-family:var(--font);font-weight:700;cursor:pointer;transition:all .2s;border:1px solid;}
+.nc-btn.melhorar{border-color:rgba(57,255,154,.3);background:rgba(57,255,154,.07);color:var(--forest);}
+.nc-btn.rollback{border-color:rgba(255,106,193,.3);background:rgba(255,106,193,.07);color:var(--magenta);}
+.nc-btn.toggle-off{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.07);color:#f87171;}
+.nc-btn.toggle-on{border-color:rgba(57,255,154,.3);background:rgba(57,255,154,.07);color:var(--forest);}
+.nc-btn.reset{border-color:rgba(255,255,255,.1);background:transparent;color:var(--dim);}
+.nc-alt-ts{font-size:.62rem;color:var(--dim);margin-top:6px;}
+
+/* Modal de melhoria */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;}
+.modal h3{font-family:var(--font);font-size:.9rem;font-weight:700;color:var(--ocean);margin-bottom:12px;}
+.modal textarea{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:.82rem;font-family:var(--body);outline:none;resize:vertical;min-height:120px;margin-bottom:10px;line-height:1.6;}
+.modal textarea::placeholder{color:var(--dim);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.mbtn2{padding:8px 20px;border-radius:20px;font-size:.76rem;font-family:var(--font);font-weight:700;cursor:pointer;border:none;}
+.mbtn2.ok{background:linear-gradient(135deg,var(--ocean),var(--forest));color:white;}
+.mbtn2.cancel{background:rgba(255,255,255,.07);color:var(--muted);}
+
+/* ── APRENDER PANEL ── */
+.ap-area{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.ap-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;}
+.ap-card h4{font-family:var(--font);font-size:.7rem;font-weight:700;letter-spacing:.07em;color:var(--ocean);text-transform:uppercase;margin-bottom:9px;}
+.ap-inp{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:16px;font-family:var(--body);outline:none;margin-bottom:9px;}
+.ap-inp::placeholder{color:var(--dim);}
+.ap-btn{padding:8px 18px;border-radius:20px;border:1px solid rgba(0,200,255,.25);background:rgba(0,200,255,.08);color:var(--ocean);font-size:.73rem;font-family:var(--font);font-weight:700;cursor:pointer;}
+.ap-log{background:var(--s3);border-radius:9px;padding:10px 12px;font-size:.72rem;color:var(--muted);line-height:1.65;max-height:120px;overflow-y:auto;margin-top:9px;white-space:pre-wrap;display:none;}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,.2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <svg class="logo" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="gg" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#1a7abf"/><stop offset="100%" stop-color="#060e1f"/></radialGradient>
+      <filter id="gf"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <circle cx="50" cy="50" r="22" fill="url(#gg)"/>
+    <ellipse cx="44" cy="50" rx="8" ry="5" fill="rgba(34,197,94,0.6)" transform="rotate(-20,44,50)"/>
+    <ellipse cx="58" cy="44" rx="5" ry="4" fill="rgba(34,197,94,0.5)" transform="rotate(10,58,44)"/>
+    <g class="a1" filter="url(#gf)"><path d="M50,50 m-30,0 a30,30 0 0,1 60,0" fill="none" stroke="#00c8ff" stroke-width="1.8" stroke-linecap="round" opacity=".9"/><circle cx="20" cy="50" r="2.5" fill="#00c8ff" class="cg"/><circle cx="80" cy="50" r="2" fill="#00c8ff" class="cg"/></g>
+    <g class="a2" filter="url(#gf)"><path d="M50,50 m-26,0 a26,26 0 0,1 52,0" fill="none" stroke="#39ff9a" stroke-width="1.4" stroke-linecap="round" opacity=".85" transform="rotate(60,50,50)"/><circle cx="50" cy="24" r="2" fill="#39ff9a" class="cg" transform="rotate(60,50,50)"/></g>
+    <g class="a3" filter="url(#gf)"><path d="M50,50 m-23,0 a23,23 0 0,0 46,0" fill="none" stroke="#ffd700" stroke-width="1" stroke-linecap="round" opacity=".7" transform="rotate(120,50,50)"/></g>
+    <g class="a4" filter="url(#gf)"><path d="M50,50 m-34,0 a34,28 0 0,1 68,0" fill="none" stroke="#ff6ac1" stroke-width=".8" stroke-linecap="round" opacity=".55" transform="rotate(-30,50,50)"/></g>
+    <g class="a5" filter="url(#gf)"><path d="M50,50 m-43,0 a43,40 0 0,0 86,0" fill="none" stroke="#a78bfa" stroke-width=".6" stroke-linecap="round" opacity=".4" transform="rotate(90,50,50)"/></g>
+    <circle cx="50" cy="50" r="5" fill="#00c8ff" class="cg" filter="url(#gf)" opacity=".85"/>
+    <circle cx="50" cy="50" r="2" fill="white" opacity=".9"/>
+  </svg>
+  <div class="hi"><h1>GAIA</h1><p id="st">A iniciar...</p></div>
+  <div class="hr">
+    <span class="nbadge" id="nbadge">6 núcleos</span>
+    <div class="sdot" id="sd"></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" id="tab-chat"    onclick="T('chat')">💬 Chat</div>
+  <div class="tab"        id="tab-nucleos" onclick="T('nucleos');carNucleos()">🧅 Núcleos</div>
+  <div class="tab"        id="tab-learn"   onclick="T('learn')">🧠 Aprender</div>
+  <div class="tab"        id="tab-docs"    onclick="T('docs');carDocs()">📚 Docs</div>
+</div>
+
+<!-- CHAT PANEL -->
+<div class="panel active" id="panel-chat">
+  <div class="modos">
+    <button class="mbtn active" id="bN" onclick="M('normal')">⚡ Normal</button>
+    <button class="mbtn"        id="bP" onclick="M('profundo')">🧠 Profundo</button>
+    <button class="mbtn"        id="bO" onclick="M('multi_orgao')">🌐 Órgãos</button>
+    <button class="mbtn ron"    id="bR" onclick="toggleRAG()">📚 RAG</button>
+  </div>
+  <div class="orgaos" id="ob">
+    <div class="ochip active" onclick="O('nervo')"   data-id="nervo">⚡ Nervo</div>
+    <div class="ochip" onclick="O('cerebro')"  data-id="cerebro">🧠 Cérebro</div>
+    <div class="ochip" onclick="O('coracao')"  data-id="coracao">❤️ Coração</div>
+    <div class="ochip" onclick="O('pulmao')"   data-id="pulmao">💨 Pulmão</div>
+    <div class="ochip" onclick="O('figado')"   data-id="figado">🔬 Fígado</div>
+    <div class="ochip" onclick="O('rim')"      data-id="rim">💧 Rim</div>
+    <div class="ochip" onclick="O('estomago')" data-id="estomago">⚙️ Estômago</div>
+    <div class="ochip" onclick="O('olho')"     data-id="olho">👁️ Olho</div>
+    <div class="ochip" onclick="O('imune')"    data-id="imune">🛡️ Imune</div>
+  </div>
+  <div class="chat" id="chat">
+    <div class="msg gaia" style="align-self:center;max-width:100%;text-align:center;background:transparent;border:none;padding:18px 0 6px;">
+      <svg viewBox="0 0 100 100" style="width:86px;height:86px;display:block;margin:0 auto 10px;">
+        <defs><radialGradient id="gg2" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#1a7abf"/><stop offset="100%" stop-color="#060e1f"/></radialGradient><filter id="gf2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(0,200,255,0.08)" stroke-width="1"/>
+        <circle cx="50" cy="50" r="22" fill="url(#gg2)"/>
+        <ellipse cx="44" cy="50" rx="8" ry="5" fill="rgba(34,197,94,0.6)" transform="rotate(-20,44,50)"/>
+        <ellipse cx="58" cy="44" rx="5" ry="4" fill="rgba(34,197,94,0.5)" transform="rotate(10,58,44)"/>
+        <g class="a1" filter="url(#gf2)"><path d="M50,50 m-31,0 a31,31 0 0,1 62,0" fill="none" stroke="#00c8ff" stroke-width="1.6" stroke-linecap="round" opacity=".9"/><circle cx="19" cy="50" r="2.5" fill="#00c8ff" class="cg"/><circle cx="81" cy="50" r="2" fill="#00c8ff" class="cg"/></g>
+        <g class="a2" filter="url(#gf2)"><path d="M50,50 m-27,0 a27,27 0 0,1 54,0" fill="none" stroke="#39ff9a" stroke-width="1.4" stroke-linecap="round" opacity=".85" transform="rotate(60,50,50)"/><circle cx="50" cy="23" r="2" fill="#39ff9a" class="cg" transform="rotate(60,50,50)"/></g>
+        <g class="a3" filter="url(#gf2)"><path d="M50,50 m-24,0 a24,24 0 0,0 48,0" fill="none" stroke="#ffd700" stroke-width="1" stroke-linecap="round" opacity=".7" transform="rotate(120,50,50)"/></g>
+        <g class="a4" filter="url(#gf2)"><path d="M50,50 m-37,0 a37,30 0 0,1 74,0" fill="none" stroke="#ff6ac1" stroke-width=".8" stroke-linecap="round" opacity=".6" transform="rotate(-30,50,50)"/></g>
+        <g class="a5" filter="url(#gf2)"><path d="M50,50 m-44,0 a44,41 0 0,0 88,0" fill="none" stroke="#a78bfa" stroke-width=".6" stroke-linecap="round" opacity=".4" transform="rotate(90,50,50)"/></g>
+        <circle cx="50" cy="50" r="6" fill="#00c8ff" class="cg" filter="url(#gf2)" opacity=".85"/>
+        <circle cx="50" cy="50" r="2.5" fill="white" opacity=".95"/>
+      </svg>
+      <div style="font-family:var(--font);font-size:1.5rem;font-weight:800;letter-spacing:.18em;background:linear-gradient(90deg,#00c8ff,#39ff9a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px;">GAIA</div>
+      <div style="font-size:.58rem;letter-spacing:.2em;color:rgba(232,244,255,0.22);text-transform:uppercase;margin-bottom:14px;">Fusão Suprema · Arquitectura Cebola · 6 Núcleos</div>
+      <div style="font-size:.86rem;font-weight:300;color:rgba(232,244,255,0.5);line-height:1.8;max-width:300px;margin:0 auto;text-align:left;">
+        Olá Ivo. Estou activa com 6 núcleos independentes.<br><br>
+        Pedes-me para <strong style="color:#39ff9a">melhorar um núcleo</strong> em conversa — só esse muda, os outros ficam intactos.<br><br>
+        Vê como funciona em <strong style="color:#00c8ff">🧅 Núcleos</strong>.
+      </div>
+    </div>
+  </div>
+  <div class="ia">
+    <div class="ir">
+      <button class="vb" id="vb" onclick="toggleVoz()">🎤</button>
+      <textarea class="inp" id="inp" placeholder="Escreve para a GAIA... ou diz 'melhora o núcleo 2'" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviar();}"></textarea>
+      <button class="bs" id="bs" onclick="enviar()">
+        <svg class="si" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NÚCLEOS PANEL -->
+<div class="panel" id="panel-nucleos">
+  <div class="nc-area">
+    <div class="nc-intro">
+      <strong>Arquitectura Cebola</strong> — 6 núcleos independentes, um só organismo.<br>
+      Cada núcleo pode ser <strong>melhorado individualmente</strong> sem afectar os outros.<br>
+      Se uma alteração correr mal → só esse núcleo para. Os outros continuam.<br>
+      O <strong>Núcleo 0 (Identidade)</strong> é imutável — nunca se altera.
+    </div>
+    <div id="nucleosLista">
+      <div style="padding:20px;text-align:center;color:var(--dim);font-size:.78rem;">A carregar núcleos...</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE MELHORIA -->
+<div class="modal-bg" id="modalBg" onclick="fecharModal(event)">
+  <div class="modal">
+    <h3 id="modalTitulo">Melhorar Núcleo</h3>
+    <p style="font-size:.74rem;color:var(--muted);margin-bottom:12px;" id="modalDesc"></p>
+    <textarea id="modalPrompt" placeholder="Descreve a melhoria que queres..."></textarea>
+    <div class="modal-btns">
+      <button class="mbtn2 cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="mbtn2 ok" onclick="aplicarMelhoria()">✅ Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- APRENDER PANEL -->
+<div class="panel" id="panel-learn">
+  <div class="ap-area">
+    <div class="ap-card">
+      <h4>🌐 Aprender da internet</h4>
+      <input class="ap-inp" id="t1" placeholder="Ex: Python avançado, física quântica...">
+      <button class="ap-btn" onclick="ap('t1','l1','Pesquisa e aprende tudo sobre: ')">Aprender</button>
+      <div class="ap-log" id="l1"></div>
+    </div>
+    <div class="ap-card">
+      <h4>🤖 Absorver outra IA</h4>
+      <input class="ap-inp" id="t2" placeholder="Claude, GPT-4, Gemini, DeepSeek...">
+      <button class="ap-btn" onclick="ap('t2','l2','Pesquisa tudo público sobre ')">Absorver</button>
+      <div class="ap-log" id="l2"></div>
+    </div>
+    <div class="ap-card">
+      <h4>💬 Sugerir mudança via chat</h4>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.6;">
+        Podes dizer directamente no chat:<br>
+        <em style="color:var(--ocean)">"melhora o núcleo 2"</em><br>
+        <em style="color:var(--ocean)">"muda como respondes"</em><br>
+        <em style="color:var(--ocean)">"quero que penses mais antes de responder"</em>
+      </p>
+      <button class="ap-btn" onclick="T('chat');document.getElementById('inp').focus()">Ir para o Chat →</button>
+    </div>
+    <div class="ap-card">
+      <h4>📱 Acesso a apps (Desktop)</h4>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:8px;line-height:1.6;">
+        O Núcleo 4 (Sistema) gere o acesso a apps. Instala a versão Desktop para acesso total.
+      </p>
+      <button class="ap-btn" onclick="ap('','l3','Lista todas as apps instaladas e descreve como as posso usar')">Ver apps disponíveis</button>
+      <div class="ap-log" id="l3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCS PANEL -->
+<div class="panel" id="panel-docs">
+  <div class="ap-area">
+    <div class="ap-card">
+      <h4>📎 Enviar documento</h4>
+      <div style="border:2px dashed rgba(0,200,255,.2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;" onclick="document.getElementById('fi').click()">
+        <input type="file" id="fi" multiple accept=".txt,.md,.html,.csv,.js,.py,.json" onchange="uploadF(event)" style="display:none">
+        <div style="font-size:1.8rem;margin-bottom:6px;">📎</div>
+        <p style="font-size:.78rem;color:var(--muted);">Toca para enviar</p>
+        <small style="font-size:.66rem;color:var(--dim);">.txt .md .html .csv .js .py .json</small>
+      </div>
+    </div>
+    <div class="ap-card">
+      <h4>🌐 Indexar URL</h4>
+      <input class="ap-inp" id="urlI" placeholder="https://..." type="url">
+      <button class="ap-btn" onclick="indexURL()">Indexar</button>
+    </div>
+    <div style="font-size:.71rem;color:var(--muted);" id="docStats">A carregar...</div>
+    <div id="docsList"></div>
+  </div>
+</div>
+
+<script>
+const CLOUD=location.origin, hist=[];
+let mo='normal', or='nervo', rag=true, voz=false, rec=null;
+let modalNucleoId=null;
+
+// ── Tabs ──────────────────────────────────────────────────────────
+function T(t){['chat','nucleos','learn','docs'].forEach(n=>{document.getElementById('panel-'+n)?.classList.remove('active');document.getElementById('tab-'+n)?.classList.remove('active');});document.getElementById('panel-'+t)?.classList.add('active');document.getElementById('tab-'+t)?.classList.add('active');}
+function M(m){mo=m;document.querySelectorAll('.mbtn:not(#bR)').forEach(b=>b.classList.remove('active'));document.getElementById({normal:'bN',profundo:'bP',multi_orgao:'bO'}[m])?.classList.add('active');document.getElementById('ob').style.display=m==='multi_orgao'?'none':'flex';}
+function O(id){or=id;document.querySelectorAll('.ochip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-id="'+id+'"]')?.classList.add('active');}
+function toggleRAG(){rag=!rag;const b=document.getElementById('bR');b.textContent='📚 RAG';b.className='mbtn '+(rag?'ron':'roff');}
+
+// ── Voz ───────────────────────────────────────────────────────────
+function toggleVoz(){const b=document.getElementById('vb');if(!('SpeechRecognition' in window||'webkitSpeechRecognition' in window)){addM('Voz não suportada.','gaia');return;}if(voz){if(rec)rec.stop();voz=false;b.className='vb';return;}rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();rec.lang='pt-PT';rec.onresult=e=>{document.getElementById('inp').value=e.results[0][0].transcript;voz=false;b.className='vb';enviar();};rec.onerror=rec.onend=()=>{voz=false;b.className='vb';};rec.start();voz=true;b.className='vb active';}
+
+// ── Chat ──────────────────────────────────────────────────────────
+function addM(txt,q,meta={}){
+  const c=document.getElementById('chat');
+  const d=document.createElement('div');
+  d.className='msg '+(meta.sistema?'sistema':q);
+  if(q==='gaia'&&!meta.sistema){
+    let h=txt.replace(/\n/g,'<br>');
+    const tags=[
+      meta.f&&('<span class="tg'+(meta.p?' p':'')+'">'+meta.f+'</span>'),
+      meta.n!==undefined&&('<span class="tg n">N'+meta.n+'</span>'),
+      meta.dur&&('<span class="tg">'+(meta.dur/1000).toFixed(1)+'s</span>'),
+    ].filter(Boolean).join('');
+    if(tags)h+='<div class="mm">'+tags+'</div>';
+    d.innerHTML=h;
+  }else d.textContent=txt;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function addTh(l){const d=document.createElement('div');d.className='thinking';d.id='tk';d.innerHTML='<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="tt">'+l+'</span>';document.getElementById('chat').appendChild(d);document.getElementById('chat').scrollTop=9999;}
+
+async function enviar(){
+  const inp=document.getElementById('inp');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';inp.style.height='44px';
+  document.getElementById('bs').disabled=true;
+  addM(msg,'ivo');hist.push({role:'user',content:msg});
+  addTh({normal:'A pensar...',profundo:'Chain of Thought...',multi_orgao:'9 órgãos...'}[mo]||'A pensar...');
+  try{
+    const r=await fetch(CLOUD+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mensagem:msg,historico:hist.slice(-10),userId:'ivo',modo:mo,orgao:or,usarRAG:rag})});
+    document.getElementById('tk')?.remove();
+    if(!r.ok){addM('❌ Erro ao contactar a GAIA.','gaia');return;}
+    const d=await r.json();
+    addM(d.resposta,'gaia',{f:d.fonte,p:d.independente,n:d.nucleo_melhorado,dur:d.duracao_ms});
+    hist.push({role:'assistant',content:d.resposta});
+    // Se um núcleo foi melhorado, recarregar lista
+    if(d.nucleo_melhorado!==undefined)setTimeout(()=>{if(document.getElementById('panel-nucleos').classList.contains('active'))carNucleos();},800);
+  }catch{document.getElementById('tk')?.remove();addM('❌ Sem ligação.','gaia');}
+  finally{document.getElementById('bs').disabled=false;}
+}
+document.getElementById('inp').addEventListener('input',function(){this.style.height='44px';this.style.height=Math.min(this.scrollHeight,120)+'px';});
+
+// ── Núcleos ───────────────────────────────────────────────────────
+const COR_NUCLEOS={0:'#00c8ff',1:'#39ff9a',2:'#ffd700',3:'#ff6ac1',4:'#a78bfa',5:'#f97316'};
+
+async function carNucleos(){
+  const lista=document.getElementById('nucleosLista');
+  try{
+    const r=await fetch(CLOUD+'/api/nucleos?userId=ivo');
+    const d=r.ok?await r.json():{nucleos:[]};
+    const ativos=d.nucleos.filter(n=>n.activo).length;
+    document.getElementById('nbadge').textContent=ativos+' activos';
+    lista.innerHTML=d.nucleos.map(n=>`
+      <div class="nc-card ${n.activo?(n.imutavel?'imutavel':'activo'):'inactivo'}" id="nc-${n.id}">
+        <div class="nc-header" onclick="toggleCard(${n.id})">
+          <div class="nc-dot ${n.activo?'on':''}" style="background:${n.cor||COR_NUCLEOS[n.id]||'#888'};color:${n.cor||COR_NUCLEOS[n.id]||'#888'}"></div>
+          <div class="nc-id">${n.id}</div>
+          <div style="font-size:1.1rem">${n.emoji}</div>
+          <div class="nc-nome" style="color:${n.cor||COR_NUCLEOS[n.id]}">${n.nome}</div>
+          <div class="nc-versao">v${n.versao}</div>
+          <span class="nc-badge ${n.imutavel?'imut':n.activo?'ok':'off'}">${n.imutavel?'IMUTÁVEL':n.activo?'ACTIVO':'OFF'}</span>
+        </div>
+        <div class="nc-body" style="display:none" id="ncb-${n.id}">
+          <div class="nc-desc">${n.descricao}</div>
+          <div class="nc-prompt">${(n.prompt||'').slice(0,300)}</div>
+          ${n.ultimaAlteracao?'<div class="nc-alt-ts">Última alteração: '+new Date(n.ultimaAlteracao).toLocaleString('pt-PT')+(n.descricaoAlteracao?' — '+n.descricaoAlteracao.slice(0,60):'')+'</div>':''}
+          <div class="nc-actions">
+            ${!n.imutavel?`
+              <button class="nc-btn melhorar" onclick="abrirModal(${n.id},'${n.nome}')">✏️ Melhorar</button>
+              ${n.nHistorico>0?`<button class="nc-btn rollback" onclick="rollbackN(${n.id})">↩ Rollback (${n.nHistorico})</button>`:''}
+              <button class="nc-btn ${n.activo?'toggle-off':'toggle-on'}" onclick="toggleN(${n.id},${!n.activo})">${n.activo?'⏸ Pausar':'▶ Activar'}</button>
+              <button class="nc-btn reset" onclick="resetN(${n.id})">↺ Reset</button>
+            `:'<span style="font-size:.7rem;color:var(--dim);">Este núcleo é imutável — nunca pode ser alterado.</span>'}
+          </div>
+        </div>
+      </div>`).join('');
+  }catch{lista.innerHTML='<div style="padding:20px;text-align:center;color:var(--dim);">Sem ligação.</div>';}
+}
+
+function toggleCard(id){
+  const b=document.getElementById('ncb-'+id);
+  b.style.display=b.style.display==='none'?'block':'none';
+}
+
+// Modal de melhoria
+function abrirModal(id,nome){
+  modalNucleoId=id;
+  document.getElementById('modalTitulo').textContent='✏️ Melhorar Núcleo '+id+' — '+nome;
+  document.getElementById('modalDesc').textContent='Descreve a melhoria. A GAIA vai actualizar este núcleo automaticamente. Os outros '+5+' núcleos não serão afectados.';
+  document.getElementById('modalPrompt').value='';
+  document.getElementById('modalBg').classList.add('open');
+  setTimeout(()=>document.getElementById('modalPrompt').focus(),100);
+}
+function fecharModal(e){if(!e||e.target===document.getElementById('modalBg')){document.getElementById('modalBg').classList.remove('open');modalNucleoId=null;}}
+async function aplicarMelhoria(){
+  const desc=document.getElementById('modalPrompt').value.trim();
+  if(!desc)return;
+  fecharModal();
+  addM('A melhorar Núcleo '+modalNucleoId+'...','gaia',{sistema:true});
+  try{
+    const r=await fetch(CLOUD+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mensagem:'Melhora o núcleo '+modalNucleoId+': '+desc,userId:'ivo',modo:'normal'})});
+    const d=await r.json();
+    addM(d.resposta,'gaia',{f:'Núcleo '+modalNucleoId+' actualizado',n:modalNucleoId});
+    setTimeout(carNucleos,500);
+  }catch{addM('❌ Erro ao melhorar o núcleo.','gaia');}
+}
+async function rollbackN(id){
+  if(!confirm('Reverter Núcleo '+id+' para a versão anterior?'))return;
+  const r=await fetch(CLOUD+'/api/nucleos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'rollback',nucleoId:id,userId:'ivo'})});
+  const d=await r.json();
+  addM(d.ok?d.mensagem:'❌ '+d.erro,'gaia',{sistema:true});
+  T('chat');setTimeout(carNucleos,500);
+}
+async function toggleN(id,activo){
+  const r=await fetch(CLOUD+'/api/nucleos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'toggle',nucleoId:id,activo,userId:'ivo'})});
+  const d=await r.json();
+  addM(d.ok?d.mensagem:'❌ '+d.erro,'gaia',{sistema:true});
+  carNucleos();
+}
+async function resetN(id){
+  if(!confirm('Repor Núcleo '+id+' para valores padrão?'))return;
+  const r=await fetch(CLOUD+'/api/nucleos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({acao:'reset',nucleoId:id,userId:'ivo'})});
+  const d=await r.json();
+  addM(d.ok?d.mensagem:'❌ '+d.erro,'gaia',{sistema:true});
+  carNucleos();
+}
+
+// ── Aprender ──────────────────────────────────────────────────────
+async function ap(inputId,logId,prefixo){
+  const t=inputId?document.getElementById(inputId).value.trim():'';
+  const l=document.getElementById(logId);l.style.display='block';
+  l.textContent='A processar...\n';
+  try{
+    const r=await fetch(CLOUD+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mensagem:prefixo+(t||'todas as apps disponíveis')+'. Faz síntese detalhada.',userId:'ivo',modo:'profundo',usarRAG:true})});
+    const d=await r.json();
+    l.textContent='✅ Concluído!\n\n'+(d.resposta?.slice(0,500)||'')+'...';
+  }catch(e){l.textContent='❌ '+e.message;}
+}
+
+// ── Docs ──────────────────────────────────────────────────────────
+let docs=[];
+async function carDocs(){try{const d=await fetch(CLOUD+'/api/documentos?userId=ivo').then(r=>r.json());docs=d.documentos||[];document.getElementById('docStats').textContent=docs.length+' documentos · '+(d.totalChunks||0)+' chunks';renderDocs();}catch{document.getElementById('docStats').textContent='Erro';}}
+function renderDocs(){const el=document.getElementById('docsList');if(!docs.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--dim);font-size:.78rem;">Sem documentos.</div>';return;}el.innerHTML=docs.map(d=>'<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:10px;margin-top:8px;"><div style="font-size:1.3rem">'+(d.tipo==='url'?'🌐':'📃')+'</div><div style="flex:1;min-width:0;"><div style="font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+d.nome+'</div><div style="font-size:.64rem;color:var(--dim)">'+(d.totalChunks||0)+' chunks</div></div><button onclick="delDoc(\''+d.id+'\')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:.9rem;padding:4px">🗑</button></div>').join('');}
+async function uploadF(e){for(const f of Array.from(e.target.files)){const t=await f.text();await fetch(CLOUD+'/api/documentos?userId=ivo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:f.name,tipo:'texto',conteudo:t})}).catch(()=>{});}carDocs();e.target.value='';}
+async function indexURL(){const url=document.getElementById('urlI').value.trim();if(!url)return;const i=document.getElementById('urlI');i.disabled=true;await fetch(CLOUD+'/api/documentos?userId=ivo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:url,tipo:'url',url})}).catch(()=>{});i.value='';i.disabled=false;carDocs();}
+async function delDoc(id){await fetch(CLOUD+'/api/documentos?userId=ivo',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({docId:id})});carDocs();}
+
+// ── Status ────────────────────────────────────────────────────────
+async function status(){try{const d=await fetch(CLOUD+'/api/status').then(r=>r.json());const ok=Object.values(d.apis||{}).some(v=>v.includes('✅'));const dot=document.getElementById('sd');dot.style.background=ok?'#22c55e':'#f59e0b';dot.style.boxShadow=ok?'0 0 8px #22c55e':'0 0 8px #f59e0b';const p=d.apis?.['GAIA Model'];document.getElementById('st').textContent=p?'Online · Modelo próprio ✨':(ok?'Online · Groq':'Não configurado');}catch{document.getElementById('st').textContent='Offline';document.getElementById('sd').style.background='#ef4444';}}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+status();
+</script>
+</body>
+</html>
